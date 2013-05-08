@@ -25,5 +25,9 @@ class TestSvnRepo(TestRepo):
     """Test the "SvnRepo" class."""
     repo_class = RepoClasses.SvnRepo
 
+class TestGitSvnRepo(TestRepo):
+    """Test the "GitSvnRepo" class."""
+    repo_class = RepoClasses.GitSvnRepo
+
 if __name__ == "__main__":
     unittest.main()
