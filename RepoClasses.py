@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 
 class Repo:
-    """The SvnHack representation of a repository."""
+    """Repository class."""
     def __init__(self, name):
         self.name = name
 
+class LocalRepo(Repo):
+    """Local repository class."""
+    def __init__(self, name, path):
+        Repo.__init__(self, name)
+
 class SvnRepo(Repo):
-    """The SvnHack representation of a remote Subversion repository."""
+    """Remote Subversion repository class."""
     def __init__(self, name):
         Repo.__init__(self, name)

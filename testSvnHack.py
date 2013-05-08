@@ -6,16 +6,23 @@ import unittest
 class TestRepo(unittest.TestCase):
     """Test the "Repo" class."""
     repo_name = "test_repo"
+    repo_class = RepoClasses.Repo
     def setUp(self):
-        self.my_repo = RepoClasses.Repo(self.repo_name)
+        self.my_repo = self.repo_class(self.repo_name)
     def test_name(self):
         """Test that Repo objects retain names from __init__."""
         self.assertEqual(self.my_repo.name, self.repo_name)
 
+class TestLocalRepo(TestRepo):
+    """Test the "LocalRepo" class."""
+    repo_class = RepoClasses.LocalRepo
+    repo_path = "/path/to/fake"
+    def setUp(self):
+        self.my_repo = self.repo_class(self.repo_name, self.repo_path)
+
 class TestSvnRepo(TestRepo):
     """Test the "SvnRepo" class."""
-    def setUp(self):
-        self.my_repo = RepoClasses.SvnRepo(self.repo_name)
+    repo_class = RepoClasses.SvnRepo
 
 if __name__ == "__main__":
     unittest.main()
