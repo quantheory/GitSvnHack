@@ -18,5 +18,6 @@ class SvnRepo(Repo):
 
 class GitSvnRepo(LocalRepo):
     """Local git-svn repository class."""
-    def __init__(self, name, path):
+    def __init__(self, name, path, svn_repo):
         Repo.__init__(self, name, path)
+        self.svn_repo = svn_repo

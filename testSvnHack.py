@@ -5,8 +5,8 @@ import unittest
 
 class TestRepo(unittest.TestCase):
     """Test the "Repo" class."""
-    repo_name = "test_repo"
     repo_class = RepoClasses.Repo
+    repo_name = "test_repo"
     repo_path = "/path/to/fake"
     def setUp(self):
         self.my_repo = self.repo_class(self.repo_name, self.repo_path)
@@ -25,9 +25,20 @@ class TestSvnRepo(TestRepo):
     """Test the "SvnRepo" class."""
     repo_class = RepoClasses.SvnRepo
 
-class TestGitSvnRepo(TestRepo):
+class TestGitSvnRepo(TestLocalRepo):
     """Test the "GitSvnRepo" class."""
     repo_class = RepoClasses.GitSvnRepo
+    svn_repo_class = RepoClasses.SvnRepo
+    svn_repo_name = "test_svn_repo"
+    svn_repo_path = "https://path/to/fake"
+    def setUp(self):
+        self.my_svn_repo = self.svn_repo_class(self.svn_repo_name,
+                                               self.svn_repo_path)
+        self.my_repo = self.repo_class(self.repo_name,
+                                       self.repo_path,
+                                       self.my_svn_repo)
+    def test_svn_repo(self):
+        self.assertTrue(self.my_svn_repo is self.my_repo.svn_repo)
 
 if __name__ == "__main__":
     unittest.main()
