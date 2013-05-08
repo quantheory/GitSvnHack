@@ -6,7 +6,7 @@ class Repo:
         self.name = name
         self.path = path
 
-class LocalRepo(Repo):
+class GitRepo(Repo):
     """Local Git repository class."""
     def __init__(self, name, path):
         Repo.__init__(self, name, path)
@@ -16,7 +16,7 @@ class SvnRepo(Repo):
     def __init__(self, name, path):
         Repo.__init__(self, name, path)
 
-class GitSvnRepo(LocalRepo):
+class GitSvnRepo(GitRepo):
     """Local git-svn repository class."""
     def __init__(self, name, path, svn_repo):
         Repo.__init__(self, name, path)

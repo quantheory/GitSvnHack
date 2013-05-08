@@ -17,15 +17,15 @@ class TestRepo(unittest.TestCase):
         """Test that Repo objects retain paths from __init__."""
         self.assertEqual(self.my_repo.path, self.repo_path)
 
-class TestLocalRepo(TestRepo):
-    """Test the "LocalRepo" class."""
-    repo_class = RepoClasses.LocalRepo
+class TestGitRepo(TestRepo):
+    """Test the "GitRepo" class."""
+    repo_class = RepoClasses.GitRepo
 
 class TestSvnRepo(TestRepo):
     """Test the "SvnRepo" class."""
     repo_class = RepoClasses.SvnRepo
 
-class TestGitSvnRepo(TestLocalRepo):
+class TestGitSvnRepo(TestGitRepo):
     """Test the "GitSvnRepo" class."""
     repo_class = RepoClasses.GitSvnRepo
     svn_repo_class = RepoClasses.SvnRepo
