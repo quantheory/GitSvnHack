@@ -13,6 +13,9 @@ class TestRepo(unittest.TestCase):
     def test_name(self):
         """Test that Repo objects retain names from __init__."""
         self.assertEqual(self.my_repo.name, self.repo_name)
+    def test_path(self):
+        """Test that Repo objects retain paths from __init__."""
+        self.assertEqual(self.my_repo.path, self.repo_path)
 
 class TestLocalRepo(TestRepo):
     """Test the "LocalRepo" class."""
