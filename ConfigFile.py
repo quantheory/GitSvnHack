@@ -11,7 +11,7 @@ empty_line = re.compile("^\s*(#.*)$")
 config_line = re.compile("^\s*(?P<var>\w+)\s*=\s*(?P<value>.*\S)\s*$")
 
 class ConfigFile():
-    """Class for files defining the Subversion to Git translation."""
+    """Class for general-purpose configuration files."""
     def __init__(self, file_path):
         self._path = file_path
     def path(self):
@@ -31,6 +31,9 @@ class ConfigFile():
                     # Unrecognized line, so exit.
                     return
         return config_vars
+
+class GitSvnDefFile(ConfigFile):
+    """Class for files defining the Subversion to Git translation."""
     def read_repo(self):
         definition = self.create_dict()
         svn_repo = SvnRepo( "svn_"+definition["name"],
