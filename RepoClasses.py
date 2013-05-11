@@ -10,13 +10,23 @@ class Repo:
     def path(self):
         return self._path
 
-class GitRepo(Repo):
-    """Local Git repository class."""
-    def __init__(self, name, path):
-        Repo.__init__(self, name, path)
+class SvnBranch:
+    """Relative paths to a Subversion branch and its tags."""
+    def __init__(self, head, tag_expr):
+        self._head = head
+        self._tags = tag_expr
+    def head(self):
+        return self._head
+    def tag_expr(self):
+        return self._tags
 
 class SvnRepo(Repo):
     """Remote Subversion repository class."""
+    def __init__(self, name, path):
+        Repo.__init__(self, name, path)
+
+class GitRepo(Repo):
+    """Local Git repository class."""
     def __init__(self, name, path):
         Repo.__init__(self, name, path)
 

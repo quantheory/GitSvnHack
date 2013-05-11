@@ -17,13 +17,28 @@ class TestRepo(unittest.TestCase):
         """Test that Repo objects retain paths from __init__."""
         self.assertEqual(self.my_repo.path(), self.repo_path)
 
-class TestGitRepo(TestRepo):
-    """Test the "GitRepo" class."""
-    repo_class = RepoClasses.GitRepo
+class TestSvnBranch(unittest.TestCase):
+    """Test the "SvnBranch" class."""
+    branch_class = RepoClasses.SvnBranch
+    head_path = "trunk"
+    tag_expr = "trunk_tags/*"
+    def setUp(self):
+        self.my_branch = self.branch_class(self.head_path,
+                                           self.tag_expr)
+    def test_head(self):
+        """Test that branch objects retain path to HEAD."""
+        self.assertEqual(self.my_branch.head(), self.head_path)
+    def test_tag_expr(self):
+        """Test that branch objects retain tag path expression."""
+        self.assertEqual(self.my_branch.tag_expr(), self.tag_expr)
 
 class TestSvnRepo(TestRepo):
     """Test the "SvnRepo" class."""
     repo_class = RepoClasses.SvnRepo
+
+class TestGitRepo(TestRepo):
+    """Test the "GitRepo" class."""
+    repo_class = RepoClasses.GitRepo
 
 class TestGitSvnRepo(TestGitRepo):
     """Test the "GitSvnRepo" class."""
