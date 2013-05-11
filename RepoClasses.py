@@ -5,9 +5,11 @@ class Repo:
     def __init__(self, name, path):
         self._name = name
         self._path = path
-    def name(self):
+    def get_name(self):
+        """Get the repository name."""
         return self._name
-    def path(self):
+    def get_path(self):
+        """Get the repository path."""
         return self._path
 
 class SvnBranch:
@@ -15,9 +17,9 @@ class SvnBranch:
     def __init__(self, head, tag_expr):
         self._head = head
         self._tags = tag_expr
-    def head(self):
+    def get_head(self):
         return self._head
-    def tag_expr(self):
+    def get_tag_expr(self):
         return self._tags
 
 class SvnRepo(Repo):
@@ -25,10 +27,10 @@ class SvnRepo(Repo):
     def __init__(self, name, path, trunk):
         Repo.__init__(self, name, path)
         self._trunk_branch = trunk
-    def trunk(self):
-        return Repo.path(self)+"/"+self._trunk_branch.head()
-    def trunk_tag_expr(self):
-        return Repo.path(self)+"/"+self._trunk_branch.tag_expr()
+    def get_trunk_head(self):
+        return Repo.get_path(self)+"/"+self._trunk_branch.get_head()
+    def get_trunk_tag_expr(self):
+        return Repo.get_path(self)+"/"+self._trunk_branch.get_tag_expr()
 
 class GitRepo(Repo):
     """Local Git repository class."""

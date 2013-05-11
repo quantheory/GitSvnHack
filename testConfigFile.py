@@ -30,7 +30,7 @@ class TestConfigFile(TestConfigBase):
     file_string = key_str+"="+val_str
     def test_path(self):
         """Test "path" method output."""
-        self.assertEqual(self.my_cfg_file.path(), self.cfg_name)
+        self.assertEqual(self.my_cfg_file.get_path(), self.cfg_name)
     def test_read_dict(self):
         """Test "read_dict" output."""
         cfg_dict = self.my_cfg_file.read_dict()
@@ -74,13 +74,13 @@ class TestGitSvnDefFile(TestConfigBase):
     def test_read_repo(self):
         """Test the read_repo method."""
         repo = self.my_cfg_file.read_repo()
-        self.assertEqual(repo.name(), self.repo_name)
-        self.assertEqual(repo.path(), self.repo_path)
-        self.assertEqual(repo.svn_repo.name(), "svn_"+self.repo_name)
-        self.assertEqual(repo.svn_repo.path(), self.repo_svn_url)
-        self.assertEqual(repo.svn_repo.trunk(),
+        self.assertEqual(repo.get_name(), self.repo_name)
+        self.assertEqual(repo.get_path(), self.repo_path)
+        self.assertEqual(repo.svn_repo.get_name(), "svn_"+self.repo_name)
+        self.assertEqual(repo.svn_repo.get_path(), self.repo_svn_url)
+        self.assertEqual(repo.svn_repo.get_trunk_head(),
                          self.repo_svn_url+"/"+self.repo_svn_trunk_head)
-        self.assertEqual(repo.svn_repo.trunk_tag_expr(),
+        self.assertEqual(repo.svn_repo.get_trunk_tag_expr(),
                          self.repo_svn_url+"/"+self.repo_svn_trunk_tags)
 
 if __name__ == "__main__":

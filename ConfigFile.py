@@ -14,7 +14,7 @@ class ConfigFile:
     """Class for general-purpose configuration files."""
     def __init__(self, path):
         self._path = path
-    def path(self):
+    def get_path(self):
         """Return path that this object was created with."""
         return self._path
     def read_dict(self):
