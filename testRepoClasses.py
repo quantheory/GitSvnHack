@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from SvnHack import RepoClasses
+from GitSvnHack import RepoClasses
 import unittest
 
 class TestRepo(unittest.TestCase):

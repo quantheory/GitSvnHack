@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from SvnHack import ConfigFile
+from GitSvnHack import ConfigFile
 import unittest
 from tempfile import mkstemp
 import os

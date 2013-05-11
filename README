@@ -1,4 +1,4 @@
-SvnHack is (or will be) a set of tools for managing git-svn
+GitSvnHack is (or will be) a set of tools for managing git-svn
 repositories with svn:externals.
 
 License: GPL version 3 or any later version

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from SvnHack.RepoClasses import SvnRepo, GitSvnRepo
+from GitSvnHack.RepoClasses import SvnRepo, GitSvnRepo
 import re
 
 # Regex for empty lines in a file (i.e. only whitespace or comments).
