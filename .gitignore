@@ -1,0 +1,7 @@
+# Emacs temporaries
+*~
+.#*
+*#
+
+# Python cache
+__pycache__/
