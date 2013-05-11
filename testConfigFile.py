@@ -45,6 +45,20 @@ class TestConfigFileBadLine(TestConfigBase):
         with self.assertRaises(ValueError):
             self.my_cfg_file.read_dict()
 
+class TestConfigFileEmpty(TestConfigBase):
+    """Test empty line in the "ConfigFile" class."""
+    file_string = "\n\n"
+    def test_empty_line(self):
+        """Test that reading an empty line is fine."""
+        self.my_cfg_file.read_dict()
+
+class TestConfigFileComment(TestConfigBase):
+    """Test comment line in the "ConfigFile" class."""
+    file_string = "  # Hi! \n"
+    def test_comment_line(self):
+        """Test that reading a comment line is fine."""
+        self.my_cfg_file.read_dict()
+
 class TestGitSvnDefFile(TestConfigBase):
     """Test the "TestGitSvnDefFile" class."""
     cfg_file_class = ConfigFile.GitSvnDefFile

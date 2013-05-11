@@ -4,7 +4,7 @@ from SvnHack.RepoClasses import SvnRepo, GitSvnRepo
 import re
 
 # Regex for empty lines in a file (i.e. only whitespace or comments).
-empty_line = re.compile("^\s*(#.*)$")
+empty_line = re.compile("^\s*(#.*)?$")
 
 # Regex for configuration line in a file.
 # Currently does not allow end-of-line comments.
