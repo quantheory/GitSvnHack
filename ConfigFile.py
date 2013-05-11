@@ -10,7 +10,7 @@ empty_line = re.compile("^\s*(#.*)?$")
 # Currently does not allow end-of-line comments.
 config_line = re.compile("^\s*(?P<var>\w+)\s*=\s*(?P<value>.*\S)\s*$")
 
-class ConfigFile():
+class ConfigFile:
     """Class for general-purpose configuration files."""
     def __init__(self, file_path):
         self._path = file_path
@@ -34,7 +34,7 @@ class ConfigFile():
                         "Unparseable line in config file.")
         return config_vars
 
-class GitSvnDefFile():
+class GitSvnDefFile:
     """Class for files defining the Subversion to Git translation."""
     def __init__(self, file_path):
         self._cfg_file = ConfigFile(file_path)
