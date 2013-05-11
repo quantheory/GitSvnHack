@@ -32,10 +32,12 @@ class ConfigFile():
                     return
         return config_vars
 
-class GitSvnDefFile(ConfigFile):
+class GitSvnDefFile():
     """Class for files defining the Subversion to Git translation."""
+    def __init__(self, file_path):
+        self._cfg_file = ConfigFile(file_path)
     def read_repo(self):
-        definition = self.read_dict()
+        definition = self._cfg_file.read_dict()
         svn_repo = SvnRepo( "svn_"+definition["name"],
                             definition["svnurl"])
         repo = GitSvnRepo( definition["name"],
