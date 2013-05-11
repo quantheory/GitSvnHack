@@ -14,8 +14,8 @@ class ConfigFile():
     """Class for files defining the Subversion to Git translation."""
     def __init__(self, file_path):
         self.path = file_path
-    def read_repo(self):
-        config_values = dict()
+    def create_dict(self):
+        config_vars = dict()
         with open(self.path, "r") as my_file:
             for line in my_file:
                 if empty_line.match(line):
@@ -23,14 +23,17 @@ class ConfigFile():
                 re_match = config_line.match(line)
                 if re_match:
                     re_match.group("var")
-                    config_values[re_match.group("var")] = \
+                    config_vars[re_match.group("var")] = \
                         re_match.group("value")
                 else:
                     # Unrecognized line, so exit.
                     return
-        svn_repo = SvnRepo( "svn_"+config_values["name"],
-                            config_values["svnurl"])
-        repo = GitSvnRepo( config_values["name"],
-                           config_values["path"],
+        return config_vars
+    def read_repo(self):
+        definition = self.create_dict()
+        svn_repo = SvnRepo( "svn_"+definition["name"],
+                            definition["svnurl"])
+        repo = GitSvnRepo( definition["name"],
+                           definition["path"],
                            svn_repo )
         return repo
