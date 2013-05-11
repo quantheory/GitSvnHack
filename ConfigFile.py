@@ -14,6 +14,8 @@ class ConfigFile():
     """Class for files defining the Subversion to Git translation."""
     def __init__(self, file_path):
         self._path = file_path
+    def path(self):
+        return self._path
     def create_dict(self):
         config_vars = dict()
         with open(self._path, "r") as my_file:
