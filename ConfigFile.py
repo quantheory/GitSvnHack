@@ -28,8 +28,9 @@ class ConfigFile():
                     config_vars[re_match.group("var")] = \
                         re_match.group("value")
                 else:
-                    # Unrecognized line, so exit.
-                    return
+                    # Unrecognized line, so raise exception.
+                    raise ValueError( \
+                        "Unparseable line in config file.")
         return config_vars
 
 class GitSvnDefFile():

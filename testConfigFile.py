@@ -15,6 +15,14 @@ class TestConfigFile(unittest.TestCase):
         test_dict = { "key1": "value1" }
         self.assertDictEqual(cfg_dict, test_dict)
 
+class TestConfigFileErr(unittest.TestCase):
+    """Test errors from the "ConfigFile" class."""
+    def test_bad_line(self):
+        cfg_def = "test_files/test_config_broken.def"
+        my_cfg_file = ConfigFile.ConfigFile(cfg_def)
+        with self.assertRaises(ValueError):
+            my_cfg_file.read_dict()
+
 class TestGitSvnDefFile(unittest.TestCase):
     """Test the "TestGitSvnDefFile" class."""
     repo_def = "test_files/test_repo.def"
