@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from GitSvnHack.RepoClasses import SvnRepo, GitSvnRepo
+from GitSvnHack.RepoClasses import SvnBranch, SvnRepo, GitSvnRepo
 import re
 
 # Regex for empty lines in a file (i.e. only whitespace or comments).
@@ -41,8 +41,10 @@ class GitSvnDefFile:
     def read_repo(self):
         """Read definition file into a repository object."""
         definition = self._cfg_file.read_dict()
+        trunk,trunk_tags = definition["svn_trunk"].split(",")
         svn_repo = SvnRepo( "svn_"+definition["name"],
-                            definition["svnurl"])
+                            definition["svn_url"],
+                            SvnBranch(trunk, trunk_tags) )
         repo = GitSvnRepo( definition["name"],
                            definition["path"],
                            svn_repo )

@@ -64,17 +64,24 @@ class TestGitSvnDefFile(TestConfigBase):
     cfg_file_class = ConfigFile.GitSvnDefFile
     repo_name = "test_repo"
     repo_path = "/path/to/test_repo"
-    repo_svnurl = "https://path/to/svn_origin"
+    repo_svn_url = "https://path/to/svn_origin"
+    repo_svn_trunk_head = "trunk"
+    repo_svn_trunk_tags = "trunk_tags/*"
     file_string = "name = "+repo_name+"\n" \
         "path = "+repo_path+"\n" \
-        "svnurl = "+repo_svnurl
+        "svn_url = "+repo_svn_url+"\n" \
+        "svn_trunk = "+repo_svn_trunk_head+","+repo_svn_trunk_tags
     def test_read_repo(self):
         """Test the read_repo method."""
         repo = self.my_cfg_file.read_repo()
         self.assertEqual(repo.name(), self.repo_name)
         self.assertEqual(repo.path(), self.repo_path)
         self.assertEqual(repo.svn_repo.name(), "svn_"+self.repo_name)
-        self.assertEqual(repo.svn_repo.path(), self.repo_svnurl)
+        self.assertEqual(repo.svn_repo.path(), self.repo_svn_url)
+        self.assertEqual(repo.svn_repo.trunk(),
+                         self.repo_svn_url+"/"+self.repo_svn_trunk_head)
+        self.assertEqual(repo.svn_repo.trunk_tag_expr(),
+                         self.repo_svn_url+"/"+self.repo_svn_trunk_tags)
 
 if __name__ == "__main__":
     unittest.main()

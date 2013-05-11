@@ -22,8 +22,13 @@ class SvnBranch:
 
 class SvnRepo(Repo):
     """Remote Subversion repository class."""
-    def __init__(self, name, path):
+    def __init__(self, name, path, trunk):
         Repo.__init__(self, name, path)
+        self._trunk_branch = trunk
+    def trunk(self):
+        return Repo.path(self)+"/"+self._trunk_branch.head()
+    def trunk_tag_expr(self):
+        return Repo.path(self)+"/"+self._trunk_branch.tag_expr()
 
 class GitRepo(Repo):
     """Local Git repository class."""
