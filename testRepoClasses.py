@@ -12,10 +12,10 @@ class TestRepo(unittest.TestCase):
         self.my_repo = self.repo_class(self.repo_name, self.repo_path)
     def test_name(self):
         """Test that Repo objects retain names from __init__."""
-        self.assertEqual(self.my_repo.name, self.repo_name)
+        self.assertEqual(self.my_repo.name(), self.repo_name)
     def test_path(self):
         """Test that Repo objects retain paths from __init__."""
-        self.assertEqual(self.my_repo.path, self.repo_path)
+        self.assertEqual(self.my_repo.path(), self.repo_path)
 
 class TestGitRepo(TestRepo):
     """Test the "GitRepo" class."""
@@ -38,7 +38,7 @@ class TestGitSvnRepo(TestGitRepo):
                                        self.repo_path,
                                        self.my_svn_repo)
     def test_svn_repo(self):
-        self.assertTrue(self.my_svn_repo is self.my_repo.svn_repo)
+        self.assertIs(self.my_svn_repo, self.my_repo.svn_repo)
 
 if __name__ == "__main__":
     unittest.main()

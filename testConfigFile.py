@@ -71,10 +71,10 @@ class TestGitSvnDefFile(TestConfigBase):
     def test_read_repo(self):
         """Test the read_repo method."""
         repo = self.my_cfg_file.read_repo()
-        self.assertEqual(repo.name, self.repo_name)
-        self.assertEqual(repo.path, self.repo_path)
-        self.assertEqual(repo.svn_repo.name, "svn_"+self.repo_name)
-        self.assertEqual(repo.svn_repo.path, self.repo_svnurl)
+        self.assertEqual(repo.name(), self.repo_name)
+        self.assertEqual(repo.path(), self.repo_path)
+        self.assertEqual(repo.svn_repo.name(), "svn_"+self.repo_name)
+        self.assertEqual(repo.svn_repo.path(), self.repo_svnurl)
 
 if __name__ == "__main__":
     unittest.main()

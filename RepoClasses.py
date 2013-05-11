@@ -3,8 +3,12 @@
 class Repo:
     """Repository class."""
     def __init__(self, name, path):
-        self.name = name
-        self.path = path
+        self._name = name
+        self._path = path
+    def name(self):
+        return self._name
+    def path(self):
+        return self._path
 
 class GitRepo(Repo):
     """Local Git repository class."""
