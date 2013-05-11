@@ -24,7 +24,6 @@ class ConfigFile():
                     continue
                 re_match = config_line.match(line)
                 if re_match:
-                    re_match.group("var")
                     config_vars[re_match.group("var")] = \
                         re_match.group("value")
                 else:
