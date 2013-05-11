@@ -10,3 +10,7 @@ class TestConfigFile(unittest.TestCase):
         self.my_config_file = ConfigFile.ConfigFile(self.file_path)
     def test_path(self):
         self.assertEqual(self.my_config_file.path, self.file_path)
+
+
+if __name__ == "__main__":
+    unittest.main()
