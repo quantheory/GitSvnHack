@@ -26,7 +26,7 @@ class TestConfigBase(unittest.TestCase):
 class TestConfigFile(TestConfigBase):
     """Test the "ConfigFile" class."""
     key_str = "key1"
-    val_str = "key2"
+    val_str = "value1"
     file_string = key_str+"="+val_str
     def test_path(self):
         """Test "path" method output."""
@@ -69,6 +69,7 @@ class TestGitSvnDefFile(TestConfigBase):
         "path = "+repo_path+"\n" \
         "svnurl = "+repo_svnurl
     def test_read_repo(self):
+        """Test the read_repo method."""
         repo = self.my_cfg_file.read_repo()
         self.assertEqual(repo.name, self.repo_name)
         self.assertEqual(repo.path, self.repo_path)

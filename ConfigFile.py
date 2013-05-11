@@ -15,8 +15,10 @@ class ConfigFile():
     def __init__(self, file_path):
         self._path = file_path
     def path(self):
+        """Return path that this object was created with."""
         return self._path
     def read_dict(self):
+        """Read configuration file into a dictionary."""
         config_vars = dict()
         with open(self._path, "r") as my_file:
             for line in my_file:
@@ -37,6 +39,7 @@ class GitSvnDefFile():
     def __init__(self, file_path):
         self._cfg_file = ConfigFile(file_path)
     def read_repo(self):
+        """Read definition file into a repository object."""
         definition = self._cfg_file.read_dict()
         svn_repo = SvnRepo( "svn_"+definition["name"],
                             definition["svnurl"])
