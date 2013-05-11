@@ -10,8 +10,6 @@ class TestConfigFile(unittest.TestCase):
     def setUp(self):
         self.my_cfg_file = ConfigFile.ConfigFile(self.cfg_def)
         self.my_repo_file = ConfigFile.ConfigFile(self.repo_def)
-    def test_path(self):
-        self.assertEqual(self.my_repo_file.path, self.repo_def)
     def test_create_dict(self):
         cfg_dict = self.my_cfg_file.create_dict()
         test_dict = dict(key1 = "value1")

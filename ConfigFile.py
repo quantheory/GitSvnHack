@@ -13,10 +13,10 @@ config_line = re.compile("^\s*(?P<var>\w+)\s*=\s*(?P<value>.*\S)\s*$")
 class ConfigFile():
     """Class for files defining the Subversion to Git translation."""
     def __init__(self, file_path):
-        self.path = file_path
+        self._path = file_path
     def create_dict(self):
         config_vars = dict()
-        with open(self.path, "r") as my_file:
+        with open(self._path, "r") as my_file:
             for line in my_file:
                 if empty_line.match(line):
                     continue
