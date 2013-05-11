@@ -12,8 +12,8 @@ config_line = re.compile("^\s*(?P<var>\w+)\s*=\s*(?P<value>.*\S)\s*$")
 
 class ConfigFile:
     """Class for general-purpose configuration files."""
-    def __init__(self, file_path):
-        self._path = file_path
+    def __init__(self, path):
+        self._path = path
     def path(self):
         """Return path that this object was created with."""
         return self._path
@@ -36,8 +36,8 @@ class ConfigFile:
 
 class GitSvnDefFile:
     """Class for files defining the Subversion to Git translation."""
-    def __init__(self, file_path):
-        self._cfg_file = ConfigFile(file_path)
+    def __init__(self, path):
+        self._cfg_file = ConfigFile(path)
     def read_repo(self):
         """Read definition file into a repository object."""
         definition = self._cfg_file.read_dict()
