@@ -23,7 +23,7 @@ class SvnBranch:
         return self._tags
 
 class SvnRepo(Repo):
-    """Remote Subversion repository class."""
+    """Subversion repository class."""
     def __init__(self, name, path, trunk):
         Repo.__init__(self, name, path)
         self._trunk_branch = trunk
@@ -33,12 +33,12 @@ class SvnRepo(Repo):
         return Repo.get_path(self)+"/"+self._trunk_branch.get_tag_expr()
 
 class GitRepo(Repo):
-    """Local Git repository class."""
+    """Git repository class."""
     def __init__(self, name, path):
         Repo.__init__(self, name, path)
 
 class GitSvnRepo(GitRepo):
-    """Local git-svn repository class."""
+    """git-svn repository class."""
     def __init__(self, name, path, svn_repo):
         GitRepo.__init__(self, name, path)
         self.svn_repo = svn_repo
