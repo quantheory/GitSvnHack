@@ -4,16 +4,19 @@
 from GitSvnHack import RepoClasses
 import unittest
 
-import tempfile
-import subprocess
 import os
-import shutil
 import re
+import shutil
+import subprocess
+import sys
+import tempfile
 
 # Could do something sophisticated or elegant, but easiest to just
 # wrap Subversion's CLI.
-# For before python 3.3, need this:
-subprocess.DEVNULL = os.open(os.devnull,os.O_WRONLY)
+
+# For before Python 3.3, need this:
+if sys.version_info[0:1] < (3,3):
+    subprocess.DEVNULL = os.open(os.devnull,os.O_WRONLY)
 
 def svn_make_test_repo():
     """Returns a URL corresponding to a locally created Subversion
