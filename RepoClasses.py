@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Classes for interaction with Subversion and Git repositories."""
 
+import subprocess
+
 class Repo:
     """Repository class."""
     def __init__(self, name, path):
@@ -43,3 +45,8 @@ class GitSvnRepo(GitRepo):
     def __init__(self, name, path, svn_repo):
         GitRepo.__init__(self, name, path)
         self.svn_repo = svn_repo
+    def clone(self, stdout=None, stderr=None):
+        subprocess.check_call(["git","svn","clone",
+                               self.svn_repo.get_trunk_head(),
+                               self.get_path()],
+                              stdout=stdout, stderr=stderr)

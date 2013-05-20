@@ -118,6 +118,13 @@ class TestGitSvnRepo(TestGitRepo):
                                        self.my_svn_repo)
     def test_svn_repo(self):
         self.assertIs(self.my_svn_repo, self.my_repo.svn_repo)
+    def test_clone(self):
+        self.my_repo.clone(stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
+        foo_path = os.path.join(self.repo_path,"foo")
+        with open(foo_path,"r") as foo_file:
+            foo_contents=foo_file.read()
+        self.assertEqual(foo_contents,"bar\n")
     def tearDown(self):
         shutil.rmtree(re.sub("^file://","",
                              self.my_svn_repo.get_path()))
