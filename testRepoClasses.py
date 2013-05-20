@@ -111,6 +111,7 @@ class TestGitSvnRepo(TestGitRepo):
     """Test the "GitSvnRepo" class."""
     repo_class = RepoClasses.GitSvnRepo
     def setUp(self):
+        self.repo_path = tempfile.mkdtemp()
         self.my_svn_repo = svn_make_test_repo()
         self.my_repo = self.repo_class(self.repo_name,
                                        self.repo_path,
@@ -120,6 +121,7 @@ class TestGitSvnRepo(TestGitRepo):
     def tearDown(self):
         shutil.rmtree(re.sub("^file://","",
                              self.my_svn_repo.get_path()))
+        shutil.rmtree(self.repo_path)
 
 if __name__ == "__main__":
     unittest.main()
