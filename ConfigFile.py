@@ -44,7 +44,7 @@ class GitSvnDefFile:
         trunk,trunk_tags = definition["svn_trunk"].split(",")
         svn_repo = SvnRepo( "svn_"+definition["name"],
                             definition["svn_url"],
-                            SvnBranch(trunk, trunk_tags) )
+                            trunk, trunk_tags)
         repo = GitSvnRepo( definition["name"],
                            definition["path"],
                            svn_repo )

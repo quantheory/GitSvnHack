@@ -37,10 +37,9 @@ class TestSvnRepo(TestRepo):
     repo_class = RepoClasses.SvnRepo
     trunk_head = "trunk"
     trunk_tags = "trunk_tags/*"
-    trunk = RepoClasses.SvnBranch(trunk_head, trunk_tags)
     def setUp(self):
         self.my_repo = self.repo_class(self.repo_name, self.repo_path,
-                                       self.trunk)
+                                       self.trunk_head, self.trunk_tags)
     def test_trunk(self):
         """Test that SvnRepo objects provide trunk path."""
         self.assertEqual(self.my_repo.get_trunk_head(),
@@ -60,8 +59,8 @@ class TestGitSvnRepo(TestGitRepo):
     svn_repo_class = RepoClasses.SvnRepo
     svn_repo_name = "test_svn_repo"
     svn_repo_path = "https://path/to/fake"
-    svn_trunk = RepoClasses.SvnBranch("trunk", "trunk_tags/*")
-    my_svn_repo = svn_repo_class(svn_repo_name, svn_repo_path, svn_trunk)
+    my_svn_repo = svn_repo_class(svn_repo_name, svn_repo_path,
+                                 "trunk", "trunk_tags/*")
     def setUp(self):
         self.my_repo = self.repo_class(self.repo_name,
                                        self.repo_path,

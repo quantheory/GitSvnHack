@@ -24,9 +24,9 @@ class SvnBranch:
 
 class SvnRepo(Repo):
     """Subversion repository class."""
-    def __init__(self, name, path, trunk):
+    def __init__(self, name, path, trunk_head, trunk_tags):
         Repo.__init__(self, name, path)
-        self._trunk_branch = trunk
+        self._trunk_branch = SvnBranch(trunk_head, trunk_tags)
     def get_trunk_head(self):
         return Repo.get_path(self)+"/"+self._trunk_branch.get_head()
     def get_trunk_tag_expr(self):
