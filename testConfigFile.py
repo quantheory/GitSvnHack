@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Unit test module for ConfigFile.py"""
 
 from GitSvnHack import ConfigFile
 import unittest

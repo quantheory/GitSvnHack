@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Unit test module for RepoClasses.py"""
 
 from GitSvnHack import RepoClasses
 import unittest

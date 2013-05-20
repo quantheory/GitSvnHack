@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Classes for interaction with Subversion and Git repositories."""
 
 class Repo:
     """Repository class."""
