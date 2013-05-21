@@ -26,9 +26,10 @@ class TestConfigBase(unittest.TestCase):
 
 class TestConfigFile(TestConfigBase):
     """Test the "ConfigFile" class."""
+    sect_str = "section1"
     key_str = "key1"
     val_str = "value1"
-    file_string = key_str+"="+val_str
+    file_string = "["+sect_str+"]\n"+key_str+"="+val_str
     def test_path(self):
         """Test "path" method output."""
         self.assertEqual(self.my_cfg_file.get_path(), self.cfg_name)

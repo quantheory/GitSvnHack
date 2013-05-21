@@ -7,6 +7,9 @@ import re
 # Regex for empty lines in a file (i.e. only whitespace or comments).
 empty_line = re.compile("^\s*(#.*)?$")
 
+# Regex for empty lines in a file (i.e. only whitespace or comments).
+section_line = re.compile("^\s*\[[^]]+\]$")
+
 # Regex for configuration line in a file.
 # Currently does not allow end-of-line comments.
 config_line = re.compile("^\s*(?P<var>\w+)\s*=\s*(?P<value>.*\S)\s*$")
@@ -23,7 +26,7 @@ class ConfigFile:
         config_vars = dict()
         with open(self._path, "r") as my_file:
             for line in my_file:
-                if empty_line.match(line):
+                if empty_line.match(line) or section_line.match(line):
                     continue
                 re_match = config_line.match(line)
                 if re_match:
