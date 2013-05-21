@@ -32,22 +32,16 @@ def svn_make_test_repo():
     subprocess.check_call(["svn","mkdir",repo_url+"/trunk_tags",
                            "-m","Creating trunk_tags directory"],
                           stdout=subprocess.DEVNULL)
-    # In order to add a file, we need a working copy.
-    wc_path = tempfile.mkdtemp()
-    subprocess.check_call(["svn","co",repo_url+"/trunk",wc_path],
-                          stdout=subprocess.DEVNULL)
-    # Subversion paths always use forward slash, but use os.path.join
-    # to add a local "foo" file in the working copy.
-    foo_path = os.path.join(wc_path,"foo")
-    with open(foo_path,"w") as foo_file:
+    # Add a file.
+    foo_fd,foo_path = tempfile.mkstemp()
+    with os.fdopen(foo_fd,"w") as foo_file:
         foo_file.write("bar\n")
-    subprocess.check_call(["svn","add",foo_path],
-                          stdout=subprocess.DEVNULL)
-    subprocess.check_call(["svn","ci",wc_path,
+    subprocess.check_call(["svn","import",foo_path,
+                           repo_url+"/trunk/foo",
                            "-m","Adding foo."],
                           stdout=subprocess.DEVNULL)
-    # Get rid of that working copy.
-    shutil.rmtree(wc_path)
+    # Remove local file
+    os.remove(foo_path)
     # Make a trunk tag.
     subprocess.check_call(["svn","cp",repo_url+"/trunk",
                            repo_url+"/trunk_tags/v1",
