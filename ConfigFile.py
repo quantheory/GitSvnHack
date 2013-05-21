@@ -18,7 +18,7 @@ class ConfigFile:
     def get_path(self):
         """Return path that this object was created with."""
         return self._path
-    def read_dict(self):
+    def get_dict(self):
         """Read configuration file into a dictionary."""
         config_vars = dict()
         with open(self._path, "r") as my_file:
@@ -39,9 +39,10 @@ class GitSvnDefFile:
     """Class for files defining the Subversion to Git translation."""
     def __init__(self, path):
         self._cfg_file = ConfigFile(path)
-    def read_repo(self):
-        """Read definition file into a repository object."""
-        definition = self._cfg_file.read_dict()
+    def get_repos(self):
+        """Read definition file into repository objects (Currently
+        only handles one definition in one file."""
+        definition = self._cfg_file.get_dict()
         trunk,trunk_tags = definition["svn_trunk"].split(",")
         svn_repo = SvnRepo( "svn_"+definition["name"],
                             definition["svn_url"],
@@ -49,4 +50,4 @@ class GitSvnDefFile:
         repo = GitSvnRepo( definition["name"],
                            definition["path"],
                            svn_repo )
-        return repo
+        return [repo]
