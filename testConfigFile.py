@@ -15,7 +15,6 @@ def write_temp_file(string):
 
 class TestConfigBase(unittest.TestCase):
     """Base test class for ConfigFile tests."""
-    cfg_file_class = ConfigFile.ConfigFile
     def setUp(self):
         """Create a mock configuration file."""
         self.cfg_name = write_temp_file(self.file_string)
@@ -23,43 +22,6 @@ class TestConfigBase(unittest.TestCase):
     def tearDown(self):
         """Remove configuration file."""
         os.remove(self.cfg_name)
-
-class TestConfigFile(TestConfigBase):
-    """Test the "ConfigFile" class."""
-    sect_str = "section1"
-    key_str = "key1"
-    val_str = "value1"
-    file_string = "["+sect_str+"]\n"+key_str+"="+val_str
-    def test_path(self):
-        """Test "path" method output."""
-        self.assertEqual(self.my_cfg_file.get_path(), self.cfg_name)
-    def test_get_dict(self):
-        """Test "get_dict" output."""
-        cfg_dict = self.my_cfg_file.get_dict()
-        test_dict = { self.key_str: self.val_str }
-        self.assertDictEqual(cfg_dict, test_dict)
-
-class TestConfigFileBadLine(TestConfigBase):
-    """Test bad line error from the "ConfigFile" class."""
-    file_string = "This is no good as a ConfigFile."
-    def test_bad_line(self):
-        """Test that a file with a bad line raises ValueError."""
-        with self.assertRaises(ValueError):
-            self.my_cfg_file.get_dict()
-
-class TestConfigFileEmpty(TestConfigBase):
-    """Test empty line in the "ConfigFile" class."""
-    file_string = "\n\n"
-    def test_empty_line(self):
-        """Test that reading an empty line is fine."""
-        self.my_cfg_file.get_dict()
-
-class TestConfigFileComment(TestConfigBase):
-    """Test comment line in the "ConfigFile" class."""
-    file_string = "  # Hi! \n"
-    def test_comment_line(self):
-        """Test that reading a comment line is fine."""
-        self.my_cfg_file.get_dict()
 
 class TestGitSvnDefFile(TestConfigBase):
     """Test the "TestGitSvnDefFile" class."""
