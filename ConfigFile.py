@@ -2,6 +2,8 @@
 """Classes corresponding to configuration files."""
 
 from GitSvnHack.RepoClasses import SvnBranch, SvnRepo, GitSvnRepo
+
+from configparser import ConfigParser, ExtendedInterpolation
 import re
 
 # Regex for empty lines in a file (i.e. only whitespace or comments).
@@ -41,16 +43,23 @@ class ConfigFile:
 class GitSvnDefFile:
     """Class for files defining the Subversion to Git translation."""
     def __init__(self, path):
-        self._cfg_file = ConfigFile(path)
+        self._path = path
+        self._cfg_parse \
+            = ConfigParser(delimiters=('='),
+                           comment_prefixes=('#'),
+                           empty_lines_in_values=False,
+                           interpolation=ExtendedInterpolation())
     def get_repos(self):
         """Read definition file into repository objects (Currently
-        only handles one definition in one file."""
-        definition = self._cfg_file.get_dict()
-        trunk,trunk_tags = definition["svn_trunk"].split(",")
-        svn_repo = SvnRepo( "svn_"+definition["name"],
-                            definition["svn_url"],
+        only handles one definition in one file)."""
+        self._cfg_parse.read(self._path)
+        section = self._cfg_parse.sections()[0]
+        section_dict = self._cfg_parse[section]
+        trunk,trunk_tags = section_dict["svn_trunk"].split(",")
+        svn_repo = SvnRepo( "svn_"+section_dict["name"],
+                            section_dict["svn_url"],
                             trunk, trunk_tags)
-        repo = GitSvnRepo( definition["name"],
-                           definition["path"],
+        repo = GitSvnRepo( section_dict["name"],
+                           section_dict["path"],
                            svn_repo )
         return [repo]
