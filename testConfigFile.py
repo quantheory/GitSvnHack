@@ -6,6 +6,7 @@ import unittest
 from tempfile import mkstemp
 import os
 
+
 def write_temp_file(string):
     """Writes a string to a temporary file and returns the name."""
     fd,cfg_name = mkstemp(text=True)
@@ -13,21 +14,28 @@ def write_temp_file(string):
         tmp_file.write(string)
     return cfg_name
 
+
 class TestConfigBase(unittest.TestCase):
     """Base test class for ConfigFile tests."""
+
     def setUp(self):
         """Create a mock configuration file."""
         self.cfg_name = write_temp_file(self.file_string)
+
     def tearDown(self):
         """Remove configuration file."""
         os.remove(self.cfg_name)
 
+
 class TestGitSvnDefParser(TestConfigBase):
     """Test the "GitSvnDefParser" class."""
+
     # Number of repos to test.
     repo_num = 2
+
     def setUp(self):
         """Create a mock GitSvnHack definition file."""
+
         def versioned_dicts(base_dict, n=self.repo_num):
             """Generate dictionary list with numbers appended to the
             value strings.
@@ -36,6 +44,7 @@ class TestGitSvnDefParser(TestConfigBase):
             return [ dict((key,val+str(i+1))
                           for key,val in base_dict.items())
                      for i in range(n) ]
+
         # Template for dicts.
         repo_base_dict = {
             "name" : "test_repo",
@@ -44,6 +53,7 @@ class TestGitSvnDefParser(TestConfigBase):
             "svn_trunk_head" : "trunk",
             "svn_trunk_tags" : "trunk_tags/*",
         }
+
         # Use version_dicts to create several unique repo definitions.
         self.repo_dicts = versioned_dicts(repo_base_dict)
         # Generate a file section representing a repo for each
@@ -85,6 +95,7 @@ class TestGitSvnDefParser(TestConfigBase):
         empty list."""
         repos = self.git_svn_def.get_repos()
         self.assertEqual(repos,[])
+
 
 if __name__ == "__main__":
     unittest.main()

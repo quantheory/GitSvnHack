@@ -3,6 +3,7 @@
 
 import subprocess
 
+
 class Repo:
     """Repository class."""
     def __init__(self, name, path, **args):
@@ -20,6 +21,7 @@ class Repo:
         """Path to the repository."""
         return self._path
 
+
 class SvnBranch:
     """Relative paths to a Subversion branch and its tags."""
     def __init__(self, head, tags):
@@ -35,6 +37,7 @@ class SvnBranch:
     def tags(self):
         """Glob expression for relative path to the branch's tags."""
         return self._tags
+
 
 class SvnRepo(Repo):
     """Subversion repository class."""
@@ -58,10 +61,12 @@ class SvnRepo(Repo):
         """SvnBranch object for trunk."""
         return self._trunk_branch
 
+
 class GitRepo(Repo):
     """Git repository class."""
     def __init__(self, **args):
         super().__init__(**args)
+
 
 class GitSvnRepo(GitRepo):
     """git-svn repository class."""
@@ -77,8 +82,8 @@ class GitSvnRepo(GitRepo):
     def clone(self, stdout=None, stderr=None):
         """Use "git svn clone" to clone the repo."""
         svn_trunk = self.svn_repo.trunk_branch
-        subprocess.check_call(["git","svn","clone",
-                               self.svn_repo.path,
-                               "-T",svn_trunk.head,
-                               self.path],
-                              stdout=stdout, stderr=stderr)
+        subprocess.check_call(
+            ["git", "svn", "clone", self.svn_repo.path,
+             "-T", svn_trunk.head, self.path],
+            stdout=stdout, stderr=stderr,
+        )
