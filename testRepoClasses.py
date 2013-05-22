@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Unit test module for RepoClasses.py"""
 
-from GitSvnHack import RepoClasses
-import unittest
-
 import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import unittest
+
+from GitSvnHack.RepoClasses import Repo, SvnBranch, SvnRepo, \
+    GitRepo, GitSvnRepo
 
 # Could do something sophisticated or elegant, but easiest to just
 # wrap Subversion's CLI.
@@ -59,16 +60,16 @@ def svn_make_test_repo():
         stdout=subprocess.DEVNULL
     )
     # *Finally*, we can create the SvnRepo object and return it.
-    return RepoClasses.SvnRepo(name="test_repo",
-                               path=repo_url,
-                               trunk_head="trunk",
-                               trunk_tags="trunk_tags/*")
+    return SvnRepo(name="test_repo",
+                   path=repo_url,
+                   trunk_head="trunk",
+                   trunk_tags="trunk_tags/*")
 
 
 class TestRepo(unittest.TestCase):
     """Test the "Repo" class."""
 
-    repo_class = RepoClasses.Repo
+    repo_class = Repo
     repo_name = "test_repo"
     repo_path = "/path/to/fake"
 
@@ -88,7 +89,7 @@ class TestRepo(unittest.TestCase):
 class TestSvnBranch(unittest.TestCase):
     """Test the "SvnBranch" class."""
 
-    branch_class = RepoClasses.SvnBranch
+    branch_class = SvnBranch
     head_path = "trunk"
     tag_expr = "trunk_tags/*"
 
@@ -108,7 +109,7 @@ class TestSvnBranch(unittest.TestCase):
 class TestSvnRepo(TestRepo):
     """Test the "SvnRepo" class."""
 
-    repo_class = RepoClasses.SvnRepo
+    repo_class = SvnRepo
     trunk_head = "trunk"
     trunk_tags = "trunk_tags/*"
 
@@ -139,13 +140,13 @@ class TestSvnRepo(TestRepo):
 
 class TestGitRepo(TestRepo):
     """Test the "GitRepo" class."""
-    repo_class = RepoClasses.GitRepo
+    repo_class = GitRepo
 
 
 class TestGitSvnRepo(TestGitRepo):
     """Test the "GitSvnRepo" class."""
 
-    repo_class = RepoClasses.GitSvnRepo
+    repo_class = GitSvnRepo
 
     def setUp(self, **args):
         self.repo_path = tempfile.mkdtemp()

@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Unit test module for ConfigFile.py"""
 
-from GitSvnHack import ConfigFile
-import unittest
-from tempfile import mkstemp
 import os
+import tempfile
+import unittest
+
+from GitSvnHack.ConfigFile import GitSvnDefParser
 
 
 def write_temp_file(string):
     """Writes a string to a temporary file and returns the name."""
-    fd,cfg_name = mkstemp(text=True)
+    fd,cfg_name = tempfile.mkstemp(text=True)
     with os.fdopen(fd, "w") as tmp_file:
         tmp_file.write(string)
     return cfg_name
@@ -73,7 +74,7 @@ class TestGitSvnDefParser(TestConfigBase):
         # Parent class writes the file.
         super().setUp()
         # Finally, the actual object to test.
-        self.git_svn_def = ConfigFile.GitSvnDefParser()
+        self.git_svn_def = GitSvnDefParser()
 
     def test_get_repos(self):
         """Test the get_repos method on one file."""

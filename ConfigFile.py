@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Classes corresponding to configuration files."""
 
-from GitSvnHack.RepoClasses import SvnBranch, SvnRepo, GitSvnRepo
-
 from configparser import ConfigParser, ExtendedInterpolation
+
+from GitSvnHack.RepoClasses import SvnBranch, SvnRepo, GitSvnRepo
 
 
 class GitSvnDefParser:
