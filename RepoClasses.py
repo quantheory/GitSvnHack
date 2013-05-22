@@ -52,6 +52,7 @@ class GitSvnRepo(GitRepo):
         GitRepo.__init__(self, name, path)
         self.svn_repo = svn_repo
     def clone(self, stdout=None, stderr=None):
+        """Use "git svn clone" to clone the repo."""
         svn_trunk = self.svn_repo.get_trunk()
         subprocess.check_call(["git","svn","clone",
                                self.svn_repo.get_path(),

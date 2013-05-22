@@ -119,8 +119,11 @@ class TestGitSvnRepo(TestGitRepo):
                                        self.repo_path,
                                        self.my_svn_repo)
     def test_svn_repo(self):
+        """Check that the Subversion repo used to initialize a
+        GitSvnRepo is preserved."""
         self.assertIs(self.my_svn_repo, self.my_repo.svn_repo)
     def test_clone(self):
+        """Test GitSvnRepo's clone method."""
         self.my_repo.clone(stdout=subprocess.DEVNULL,
                            stderr=subprocess.DEVNULL)
         foo_path = os.path.join(self.repo_path,"foo")
