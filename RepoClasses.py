@@ -5,9 +5,10 @@ import subprocess
 
 class Repo:
     """Repository class."""
-    def __init__(self, name, path):
+    def __init__(self, name, path, **args):
         self._name = name
         self._path = path
+        super().__init__(**args)
     def get_name(self):
         """Get the repository name."""
         return self._name
@@ -27,9 +28,9 @@ class SvnBranch:
 
 class SvnRepo(Repo):
     """Subversion repository class."""
-    def __init__(self, name, path, trunk_head, trunk_tags):
-        Repo.__init__(self, name, path)
+    def __init__(self, trunk_head, trunk_tags, **args):
         self._trunk_branch = SvnBranch(trunk_head, trunk_tags)
+        super().__init__(**args)
     def get_trunk_head(self):
         """Return URL for the repo's trunk."""
         return Repo.get_path(self)+"/"+self._trunk_branch.get_head()
@@ -43,14 +44,14 @@ class SvnRepo(Repo):
 
 class GitRepo(Repo):
     """Git repository class."""
-    def __init__(self, name, path):
-        Repo.__init__(self, name, path)
+    def __init__(self, **args):
+        super().__init__(**args)
 
 class GitSvnRepo(GitRepo):
     """git-svn repository class."""
-    def __init__(self, name, path, svn_repo):
-        GitRepo.__init__(self, name, path)
+    def __init__(self, svn_repo, **args):
         self.svn_repo = svn_repo
+        super().__init__(**args)
     def clone(self, stdout=None, stderr=None):
         """Use "git svn clone" to clone the repo."""
         svn_trunk = self.svn_repo.get_trunk()

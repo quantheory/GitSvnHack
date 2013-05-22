@@ -21,12 +21,13 @@ class GitSvnDefParser:
         repos = []
         for name in repo_names:
             section_dict = self._cfg_parse[name]
-            trunk,trunk_tags = section_dict["svn_trunk"].split(",")
-            svn_repo = SvnRepo( "svn_"+name,
-                                section_dict["svn_url"],
-                                trunk, trunk_tags)
-            repos.append( GitSvnRepo( name,
-                                      section_dict["path"],
-                                      svn_repo)
+            trunk_head,trunk_tags = section_dict["svn_trunk"].split(",")
+            svn_repo = SvnRepo( name="svn_"+name,
+                                path=section_dict["svn_url"],
+                                trunk_head=trunk_head,
+                                trunk_tags=trunk_tags)
+            repos.append( GitSvnRepo( name=name,
+                                      path=section_dict["path"],
+                                      svn_repo=svn_repo)
                       )
         return repos

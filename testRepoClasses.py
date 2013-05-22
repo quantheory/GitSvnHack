@@ -48,16 +48,20 @@ def svn_make_test_repo():
                            "-m","Making first trunk tag."],
                           stdout=subprocess.DEVNULL)
     # *Finally*, we can create the SvnRepo object and return it.
-    return RepoClasses.SvnRepo("test_repo",repo_url,
-                               "trunk","trunk_tags/*")
+    return RepoClasses.SvnRepo(name="test_repo",
+                               path=repo_url,
+                               trunk_head="trunk",
+                               trunk_tags="trunk_tags/*")
 
 class TestRepo(unittest.TestCase):
     """Test the "Repo" class."""
     repo_class = RepoClasses.Repo
     repo_name = "test_repo"
     repo_path = "/path/to/fake"
-    def setUp(self):
-        self.my_repo = self.repo_class(self.repo_name, self.repo_path)
+    def setUp(self, **args):
+        args.setdefault("name",self.repo_name)
+        args.setdefault("path",self.repo_path)
+        self.my_repo = self.repo_class(**args)
     def test_name(self):
         """Test that Repo objects retain names from __init__."""
         self.assertEqual(self.my_repo.get_name(), self.repo_name)
@@ -85,9 +89,10 @@ class TestSvnRepo(TestRepo):
     repo_class = RepoClasses.SvnRepo
     trunk_head = "trunk"
     trunk_tags = "trunk_tags/*"
-    def setUp(self):
-        self.my_repo = self.repo_class(self.repo_name, self.repo_path,
-                                       self.trunk_head, self.trunk_tags)
+    def setUp(self, **args):
+        args.setdefault("trunk_head", self.trunk_head)
+        args.setdefault("trunk_tags", self.trunk_tags)
+        super().setUp(**args)
     def test_trunk_head(self):
         """Test that SvnRepo objects provide trunk path."""
         self.assertEqual(self.my_repo.get_trunk_head(),
@@ -112,12 +117,11 @@ class TestGitRepo(TestRepo):
 class TestGitSvnRepo(TestGitRepo):
     """Test the "GitSvnRepo" class."""
     repo_class = RepoClasses.GitSvnRepo
-    def setUp(self):
+    def setUp(self, **args):
         self.repo_path = tempfile.mkdtemp()
         self.my_svn_repo = svn_make_test_repo()
-        self.my_repo = self.repo_class(self.repo_name,
-                                       self.repo_path,
-                                       self.my_svn_repo)
+        args.setdefault("svn_repo", self.my_svn_repo)
+        super().setUp(**args)
     def test_svn_repo(self):
         """Check that the Subversion repo used to initialize a
         GitSvnRepo is preserved."""
