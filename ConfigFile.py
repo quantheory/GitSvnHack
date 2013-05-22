@@ -3,7 +3,7 @@
 
 from configparser import ConfigParser, ExtendedInterpolation
 
-from GitSvnHack.RepoClasses import SvnBranch, SvnRepo, GitSvnRepo
+from GitSvnHack.repository import SvnBranch, SvnRepo, GitSvnRepo
 
 
 class GitSvnDefParser:

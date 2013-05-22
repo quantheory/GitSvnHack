@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit test module for RepoClasses.py"""
+"""Unit test module for repository.py"""
 
 import os
 import re
@@ -9,7 +9,7 @@ import sys
 import tempfile
 import unittest
 
-from GitSvnHack.RepoClasses import Repo, SvnBranch, SvnRepo, \
+from GitSvnHack.repository import Repo, SvnBranch, SvnRepo, \
     GitRepo, GitSvnRepo
 
 # Could do something sophisticated or elegant, but easiest to just
