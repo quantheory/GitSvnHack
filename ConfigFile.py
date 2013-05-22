@@ -15,16 +15,18 @@ class GitSvnDefFile:
                            empty_lines_in_values=False,
                            interpolation=ExtendedInterpolation())
     def get_repos(self):
-        """Read definition file into repository objects (Currently
-        only handles one definition in one file)."""
+        """Read definition file into repository objects."""
         self._cfg_parse.read(self._path)
-        repo_name = self._cfg_parse.sections()[0]
-        section_dict = self._cfg_parse[repo_name]
-        trunk,trunk_tags = section_dict["svn_trunk"].split(",")
-        svn_repo = SvnRepo( "svn_"+repo_name,
-                            section_dict["svn_url"],
-                            trunk, trunk_tags)
-        repo = GitSvnRepo( repo_name,
-                           section_dict["path"],
-                           svn_repo )
-        return [repo]
+        repo_names = self._cfg_parse.sections()
+        repos = []
+        for name in repo_names:
+            section_dict = self._cfg_parse[name]
+            trunk,trunk_tags = section_dict["svn_trunk"].split(",")
+            svn_repo = SvnRepo( "svn_"+name,
+                                section_dict["svn_url"],
+                                trunk, trunk_tags)
+            repos.append( GitSvnRepo( name,
+                                      section_dict["path"],
+                                      svn_repo)
+                      )
+        return repos
