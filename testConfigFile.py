@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Unit test module for ConfigFile.py"""
+"""Unit test module for parsedef.py"""
 
 import os
 import tempfile
 import unittest
 
-from GitSvnHack.ConfigFile import GitSvnDefParser
+from GitSvnHack.parsedef import GitSvnDefParser
 
 
 def write_temp_file(string):
@@ -17,7 +17,7 @@ def write_temp_file(string):
 
 
 class TestConfigBase(unittest.TestCase):
-    """Base test class for ConfigFile tests."""
+    """Base test class for parsedef tests."""
 
     def setUp(self):
         """Create a mock configuration file."""
