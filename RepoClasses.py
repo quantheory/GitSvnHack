@@ -31,9 +31,15 @@ class SvnRepo(Repo):
         Repo.__init__(self, name, path)
         self._trunk_branch = SvnBranch(trunk_head, trunk_tags)
     def get_trunk_head(self):
+        """Return URL for the repo's trunk."""
         return Repo.get_path(self)+"/"+self._trunk_branch.get_head()
     def get_trunk_tag_expr(self):
+        """Return expression for the URLs corresponding to trunk
+        tags."""
         return Repo.get_path(self)+"/"+self._trunk_branch.get_tag_expr()
+    def get_trunk(self):
+        """Return entire trunk branch."""
+        return self._trunk_branch
 
 class GitRepo(Repo):
     """Git repository class."""

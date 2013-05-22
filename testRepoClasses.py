@@ -88,7 +88,7 @@ class TestSvnRepo(TestRepo):
     def setUp(self):
         self.my_repo = self.repo_class(self.repo_name, self.repo_path,
                                        self.trunk_head, self.trunk_tags)
-    def test_trunk(self):
+    def test_trunk_head(self):
         """Test that SvnRepo objects provide trunk path."""
         self.assertEqual(self.my_repo.get_trunk_head(),
                          self.repo_path+"/"+self.trunk_head)
@@ -96,6 +96,14 @@ class TestSvnRepo(TestRepo):
         """Test that SvnRepo objects provide trunk tag expression."""
         self.assertEqual(self.my_repo.get_trunk_tag_expr(),
                          self.repo_path+"/"+self.trunk_tags)
+    def test_trunk(self):
+        """Test that SvnRepo objects provide the whole trunk
+        branch."""
+        trunk_branch = self.my_repo.get_trunk()
+        self.assertEqual(trunk_branch.get_head(),
+                         self.trunk_head)
+        self.assertEqual(trunk_branch.get_tag_expr(),
+                         self.trunk_tags)
 
 class TestGitRepo(TestRepo):
     """Test the "GitRepo" class."""
