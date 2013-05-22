@@ -32,7 +32,6 @@ class TestGitSvnDefFile(TestConfigBase):
     repo_svn_trunk_head = "trunk"
     repo_svn_trunk_tags = "trunk_tags/*"
     file_string = "["+repo_name+"]\n" \
-                  "name = "+repo_name+"\n" \
                   "path = "+repo_path+"\n" \
                   "svn_url = "+repo_svn_url+"\n" \
                   "svn_trunk = "+repo_svn_trunk_head+ \

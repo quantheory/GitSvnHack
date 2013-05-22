@@ -18,13 +18,13 @@ class GitSvnDefFile:
         """Read definition file into repository objects (Currently
         only handles one definition in one file)."""
         self._cfg_parse.read(self._path)
-        section = self._cfg_parse.sections()[0]
-        section_dict = self._cfg_parse[section]
+        repo_name = self._cfg_parse.sections()[0]
+        section_dict = self._cfg_parse[repo_name]
         trunk,trunk_tags = section_dict["svn_trunk"].split(",")
-        svn_repo = SvnRepo( "svn_"+section_dict["name"],
+        svn_repo = SvnRepo( "svn_"+repo_name,
                             section_dict["svn_url"],
                             trunk, trunk_tags)
-        repo = GitSvnRepo( section_dict["name"],
+        repo = GitSvnRepo( repo_name,
                            section_dict["path"],
                            svn_repo )
         return [repo]
