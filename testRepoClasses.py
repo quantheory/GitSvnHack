@@ -35,7 +35,7 @@ def svn_make_test_repo():
     # Add a file.
     foo_fd,foo_path = tempfile.mkstemp()
     with os.fdopen(foo_fd,"w") as foo_file:
-        foo_file.write("bar\n")
+        foo_file.write("bar1\n")
     subprocess.check_call(["svn","import",foo_path,
                            repo_url+"/trunk/foo",
                            "-m","Adding foo."],
@@ -126,7 +126,7 @@ class TestGitSvnRepo(TestGitRepo):
         foo_path = os.path.join(self.repo_path,"foo")
         with open(foo_path,"r") as foo_file:
             foo_contents=foo_file.read()
-        self.assertEqual(foo_contents,"bar\n")
+        self.assertEqual(foo_contents,"bar1\n")
     def tearDown(self):
         shutil.rmtree(re.sub("^file://","",
                              self.my_svn_repo.get_path()))
