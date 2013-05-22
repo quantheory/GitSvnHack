@@ -9,21 +9,31 @@ class Repo:
         self._name = name
         self._path = path
         super().__init__(**args)
-    def get_name(self):
-        """Get the repository name."""
+
+    @property
+    def name(self):
+        """Name for the repository."""
         return self._name
-    def get_path(self):
-        """Get the repository path."""
+
+    @property
+    def path(self):
+        """Path to the repository."""
         return self._path
 
 class SvnBranch:
     """Relative paths to a Subversion branch and its tags."""
-    def __init__(self, head, tag_expr):
+    def __init__(self, head, tags):
         self._head = head
-        self._tags = tag_expr
-    def get_head(self):
+        self._tags = tags
+
+    @property
+    def head(self):
+        """Relative path to the branch's head."""
         return self._head
-    def get_tag_expr(self):
+
+    @property
+    def tags(self):
+        """Glob expression for relative path to the branch's tags."""
         return self._tags
 
 class SvnRepo(Repo):
@@ -31,15 +41,21 @@ class SvnRepo(Repo):
     def __init__(self, trunk_head, trunk_tags, **args):
         self._trunk_branch = SvnBranch(trunk_head, trunk_tags)
         super().__init__(**args)
-    def get_trunk_head(self):
-        """Return URL for the repo's trunk."""
-        return Repo.get_path(self)+"/"+self._trunk_branch.get_head()
-    def get_trunk_tag_expr(self):
-        """Return expression for the URLs corresponding to trunk
+
+    @property
+    def trunk_head(self):
+        """URL for the repo's trunk."""
+        return self.path+"/"+self._trunk_branch.head
+
+    @property
+    def trunk_tags(self):
+        """Glob expression for the URLs corresponding to trunk
         tags."""
-        return Repo.get_path(self)+"/"+self._trunk_branch.get_tag_expr()
-    def get_trunk(self):
-        """Return entire trunk branch."""
+        return self.path+"/"+self._trunk_branch.tags
+
+    @property
+    def trunk_branch(self):
+        """SvnBranch object for trunk."""
         return self._trunk_branch
 
 class GitRepo(Repo):
@@ -50,13 +66,19 @@ class GitRepo(Repo):
 class GitSvnRepo(GitRepo):
     """git-svn repository class."""
     def __init__(self, svn_repo, **args):
-        self.svn_repo = svn_repo
+        self._svn_repo = svn_repo
         super().__init__(**args)
+
+    @property
+    def svn_repo(self):
+        """Subversion repository corresponding to this GitSvnRepo."""
+        return self._svn_repo
+
     def clone(self, stdout=None, stderr=None):
         """Use "git svn clone" to clone the repo."""
-        svn_trunk = self.svn_repo.get_trunk()
+        svn_trunk = self.svn_repo.trunk_branch
         subprocess.check_call(["git","svn","clone",
-                               self.svn_repo.get_path(),
-                               "-T",svn_trunk.get_head(),
-                               self.get_path()],
+                               self.svn_repo.path,
+                               "-T",svn_trunk.head,
+                               self.path],
                               stdout=stdout, stderr=stderr)

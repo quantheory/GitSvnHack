@@ -71,14 +71,13 @@ class TestGitSvnDefParser(TestConfigBase):
         repos = self.git_svn_def.get_repos()
         self.assertEqual(len(repos),len(self.repo_dicts))
         for repo,rd in zip(repos,self.repo_dicts):
-            self.assertEqual(repo.get_name(), rd["name"])
-            self.assertEqual(repo.get_path(), rd["path"])
-            self.assertEqual(repo.svn_repo.get_name(),
-                             "svn_"+rd["name"])
-            self.assertEqual(repo.svn_repo.get_path(), rd["svn_url"])
-            self.assertEqual(repo.svn_repo.get_trunk_head(),
+            self.assertEqual(repo.name, rd["name"])
+            self.assertEqual(repo.path, rd["path"])
+            self.assertEqual(repo.svn_repo.name, "svn_"+rd["name"])
+            self.assertEqual(repo.svn_repo.path, rd["svn_url"])
+            self.assertEqual(repo.svn_repo.trunk_head,
                              rd["svn_url"]+"/"+rd["svn_trunk_head"])
-            self.assertEqual(repo.svn_repo.get_trunk_tag_expr(),
+            self.assertEqual(repo.svn_repo.trunk_tags,
                              rd["svn_url"]+"/"+rd["svn_trunk_tags"])
 
     def test_no_files(self):

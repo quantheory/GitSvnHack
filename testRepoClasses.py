@@ -64,10 +64,10 @@ class TestRepo(unittest.TestCase):
         self.my_repo = self.repo_class(**args)
     def test_name(self):
         """Test that Repo objects retain names from __init__."""
-        self.assertEqual(self.my_repo.get_name(), self.repo_name)
+        self.assertEqual(self.my_repo.name, self.repo_name)
     def test_path(self):
         """Test that Repo objects retain paths from __init__."""
-        self.assertEqual(self.my_repo.get_path(), self.repo_path)
+        self.assertEqual(self.my_repo.path, self.repo_path)
 
 class TestSvnBranch(unittest.TestCase):
     """Test the "SvnBranch" class."""
@@ -79,10 +79,10 @@ class TestSvnBranch(unittest.TestCase):
                                            self.tag_expr)
     def test_head(self):
         """Test that branch objects retain path to HEAD."""
-        self.assertEqual(self.my_branch.get_head(), self.head_path)
+        self.assertEqual(self.my_branch.head, self.head_path)
     def test_tag_expr(self):
         """Test that branch objects retain tag path expression."""
-        self.assertEqual(self.my_branch.get_tag_expr(), self.tag_expr)
+        self.assertEqual(self.my_branch.tags, self.tag_expr)
 
 class TestSvnRepo(TestRepo):
     """Test the "SvnRepo" class."""
@@ -95,19 +95,19 @@ class TestSvnRepo(TestRepo):
         super().setUp(**args)
     def test_trunk_head(self):
         """Test that SvnRepo objects provide trunk path."""
-        self.assertEqual(self.my_repo.get_trunk_head(),
+        self.assertEqual(self.my_repo.trunk_head,
                          self.repo_path+"/"+self.trunk_head)
     def test_trunk_tag_expr(self):
         """Test that SvnRepo objects provide trunk tag expression."""
-        self.assertEqual(self.my_repo.get_trunk_tag_expr(),
+        self.assertEqual(self.my_repo.trunk_tags,
                          self.repo_path+"/"+self.trunk_tags)
     def test_trunk(self):
         """Test that SvnRepo objects provide the whole trunk
         branch."""
-        trunk_branch = self.my_repo.get_trunk()
-        self.assertEqual(trunk_branch.get_head(),
+        trunk_branch = self.my_repo.trunk_branch
+        self.assertEqual(trunk_branch.head,
                          self.trunk_head)
-        self.assertEqual(trunk_branch.get_tag_expr(),
+        self.assertEqual(trunk_branch.tags,
                          self.trunk_tags)
 
 class TestGitRepo(TestRepo):
@@ -136,7 +136,7 @@ class TestGitSvnRepo(TestGitRepo):
         self.assertEqual(foo_contents,"bar1\n")
     def tearDown(self):
         shutil.rmtree(re.sub("^file://","",
-                             self.my_svn_repo.get_path()))
+                             self.my_svn_repo.path))
         shutil.rmtree(self.repo_path)
 
 if __name__ == "__main__":
