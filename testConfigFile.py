@@ -33,8 +33,8 @@ class TestGitSvnDefParser(TestConfigBase):
             value strings.
             E.g. versioned_dicts({"string":"test"},2) ==
             [{"string":"test1"},{"string":"test2"}]"""
-            return [ dict([(key,val+str(i+1))
-                           for key,val in base_dict.items()])
+            return [ dict((key,val+str(i+1))
+                          for key,val in base_dict.items())
                      for i in range(n) ]
         # Template for dicts.
         repo_base_dict = {
