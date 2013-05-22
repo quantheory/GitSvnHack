@@ -165,7 +165,7 @@ class TestGitSvnRepo(TestGitRepo):
                            stderr=subprocess.DEVNULL)
         foo_path = os.path.join(self.repo_path,"foo")
         with open(foo_path,"r") as foo_file:
-            foo_contents=foo_file.read()
+            foo_contents = foo_file.read()
         self.assertEqual(foo_contents,"bar1\n")
 
     def tearDown(self):

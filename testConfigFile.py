@@ -40,19 +40,19 @@ class TestGitSvnDefParser(TestConfigBase):
         def versioned_dicts(base_dict, n=self.repo_num):
             """Generate dictionary list with numbers appended to the
             value strings.
-            E.g. versioned_dicts({"string":"test"},2) ==
-            [{"string":"test1"},{"string":"test2"}]"""
-            return [ dict((key,val+str(i+1))
-                          for key,val in base_dict.items())
-                     for i in range(n) ]
+            E.g. versioned_dicts({"string": "test"},2) ==
+            [{"string": "test1"},{"string": "test2"}]"""
+            return [dict((key,val+str(i+1))
+                         for key,val in base_dict.items())
+                    for i in range(n)]
 
         # Template for dicts.
         repo_base_dict = {
-            "name" : "test_repo",
-            "path" : "/path/to/test_repo",
-            "svn_url" : "file://svn_origin",
-            "svn_trunk_head" : "trunk",
-            "svn_trunk_tags" : "trunk_tags/*",
+            "name": "test_repo",
+            "path": "/path/to/test_repo",
+            "svn_url": "file://svn_origin",
+            "svn_trunk_head": "trunk",
+            "svn_trunk_tags": "trunk_tags/*",
         }
 
         # Use version_dicts to create several unique repo definitions.
