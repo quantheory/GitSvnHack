@@ -18,14 +18,13 @@ class TestConfigBase(unittest.TestCase):
     def setUp(self):
         """Create a mock configuration file."""
         self.cfg_name = write_temp_file(self.file_string)
-        self.my_cfg_file = self.cfg_file_class(self.cfg_name)
     def tearDown(self):
         """Remove configuration file."""
         os.remove(self.cfg_name)
 
-class TestGitSvnDefFile(TestConfigBase):
-    """Test the "TestGitSvnDefFile" class."""
-    cfg_file_class = ConfigFile.GitSvnDefFile
+class TestGitSvnDefParser(TestConfigBase):
+    """Test the "GitSvnDefParser" class."""
+    # Number of repos to test.
     repo_num = 2
     def setUp(self):
         """Create a mock GitSvnHack definition file."""
@@ -63,10 +62,13 @@ class TestGitSvnDefFile(TestConfigBase):
         self.file_string = "\n".join(file_sections)
         # Parent class writes the file.
         super().setUp()
+        # Finally, the actual object to test.
+        self.git_svn_def = ConfigFile.GitSvnDefParser()
 
     def test_get_repos(self):
         """Test the get_repos method on one file."""
-        repos = self.my_cfg_file.get_repos()
+        self.git_svn_def.read(self.cfg_name)
+        repos = self.git_svn_def.get_repos()
         self.assertEqual(len(repos),len(self.repo_dicts))
         for repo,rd in zip(repos,self.repo_dicts):
             self.assertEqual(repo.get_name(), rd["name"])
@@ -78,6 +80,12 @@ class TestGitSvnDefFile(TestConfigBase):
                              rd["svn_url"]+"/"+rd["svn_trunk_head"])
             self.assertEqual(repo.svn_repo.get_trunk_tag_expr(),
                              rd["svn_url"]+"/"+rd["svn_trunk_tags"])
+
+    def test_no_files(self):
+        """Test that the get_repos method on zero files yields an
+        empty list."""
+        repos = self.git_svn_def.get_repos()
+        self.assertEqual(repos,[])
 
 if __name__ == "__main__":
     unittest.main()

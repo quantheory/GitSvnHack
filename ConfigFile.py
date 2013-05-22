@@ -5,18 +5,18 @@ from GitSvnHack.RepoClasses import SvnBranch, SvnRepo, GitSvnRepo
 
 from configparser import ConfigParser, ExtendedInterpolation
 
-class GitSvnDefFile:
+class GitSvnDefParser:
     """Class for files defining the Subversion to Git translation."""
-    def __init__(self, path):
-        self._path = path
+    def __init__(self):
         self._cfg_parse \
             = ConfigParser(delimiters=('='),
                            comment_prefixes=('#'),
                            empty_lines_in_values=False,
                            interpolation=ExtendedInterpolation())
+    def read(self, path):
+        self._cfg_parse.read(path)
     def get_repos(self):
         """Read definition file into repository objects."""
-        self._cfg_parse.read(self._path)
         repo_names = self._cfg_parse.sections()
         repos = []
         for name in repo_names:
