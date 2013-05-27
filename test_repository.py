@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Unit test module for repository.py"""
 
+import contextlib
 import os
 import re
 import shutil
@@ -19,6 +20,7 @@ from GitSvnHack.repository import Repo, SvnBranch, SvnRepo, \
 if sys.version_info[0:1] < (3,3):
     subprocess.DEVNULL = os.open(os.devnull,os.O_WRONLY)
     FileNotFoundError = OSError
+
 
 class TempFile:
     """Context manager class for files that exist only for one test, and
@@ -60,33 +62,6 @@ class TempFile:
         except FileNotFoundError:
             pass
 
-def svn_make_test_repo():
-    """Returns a URL corresponding to a locally created Subversion
-    repo."""
-
-    # Create repo directory and get URL.
-    repo_path = tempfile.mkdtemp()
-    repo_url = "file://"+repo_path
-
-    # Use SvnRepo object to initialize the repo there.
-    svn_test_repo = SvnRepo(name="test_repo",
-                            path=repo_url,
-                            trunk_head="trunk",
-                            trunk_tags="trunk_tags/*")
-    svn_test_repo.create()
-
-    # Add a file.
-    with TempFile() as foo_file:
-        with foo_file.open("w") as foo:
-            foo.write("bar1\n")
-        svn_test_repo.trunk_import(foo_file.path, "foo", "Adding foo.")
-
-    # Make a trunk tag.
-    svn_test_repo.make_trunk_tag("v1", "Making first trunk tag.")
-
-    # *Finally*, we can return the SvnRepo object.
-    return svn_test_repo
-
 
 class TestRepo(unittest.TestCase):
     """Test the "Repo" class."""
@@ -107,6 +82,7 @@ class TestRepo(unittest.TestCase):
     def test_path(self):
         """Test that Repo objects retain paths from __init__."""
         self.assertEqual(self.my_repo.path, self.repo_path)
+
 
 class TestSvnBranch(unittest.TestCase):
     """Test the "SvnBranch" class."""
@@ -226,6 +202,35 @@ class TestGitRepo(TestRepo):
     repo_class = GitRepo
 
 
+@contextlib.contextmanager
+def SvnTestRepo():
+    """Context manager for a Subversion test repo. This is set up for
+    convenience in testing GitSvnRepo."""
+
+    # Use SvnRepo object to initialize the repo in a temporary directory.
+    svn_test_repo = SvnRepo(name="test_repo",
+                            path="file://"+tempfile.mkdtemp(),
+                            trunk_head="trunk",
+                            trunk_tags="trunk_tags/*")
+    svn_test_repo.create()
+
+    # Add a file.
+    with TempFile() as foo_file:
+        with foo_file.open("w") as foo:
+            foo.write("bar1\n")
+        svn_test_repo.trunk_import(foo_file.path, "foo", "Adding foo.")
+
+    # Make a trunk tag.
+    svn_test_repo.make_trunk_tag("v1", "Making first trunk tag.")
+
+    # *Finally*, we can return the SvnRepo object.
+    yield svn_test_repo
+
+    # This will execute when exiting the context.
+    shutil.rmtree(re.sub("^file://","",
+                         svn_test_repo.path))
+
+
 class TestGitSvnRepo(TestGitRepo):
     """Test the "GitSvnRepo" class."""
 
@@ -233,13 +238,13 @@ class TestGitSvnRepo(TestGitRepo):
 
     def setUp(self, **args):
         self.repo_path = tempfile.mkdtemp()
-        self.my_svn_repo = svn_make_test_repo()
+        self.svn_test_repo = SvnTestRepo()
+        self.my_svn_repo = self.svn_test_repo.__enter__()
         args.setdefault("svn_repo", self.my_svn_repo)
         super().setUp(**args)
 
     def tearDown(self):
-        shutil.rmtree(re.sub("^file://","",
-                             self.my_svn_repo.path))
+        self.svn_test_repo.__exit__(None, None, None)
         shutil.rmtree(self.repo_path)
 
     def test_svn_repo(self):
