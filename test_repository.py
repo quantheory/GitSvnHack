@@ -26,20 +26,14 @@ def svn_make_test_repo():
 
     # Create repo directory and get URL.
     repo_path = tempfile.mkdtemp()
-    subprocess.check_call(["svnadmin","create",repo_path])
     repo_url = "file://"+repo_path
 
-    # Create top level directories.
-    subprocess.check_call(
-        ["svn", "mkdir", repo_url+"/trunk",
-         "-m", "Creating trunk directory."],
-        stdout=subprocess.DEVNULL
-    )
-    subprocess.check_call(
-        ["svn", "mkdir", repo_url+"/trunk_tags",
-         "-m", "Creating trunk_tags directory"],
-        stdout=subprocess.DEVNULL
-    )
+    # Use SvnRepo object to initialize the repo there.
+    svn_test_repo = SvnRepo(name="test_repo",
+                            path=repo_url,
+                            trunk_head="trunk",
+                            trunk_tags="trunk_tags/*")
+    svn_test_repo.create()
 
     # Add a file.
     foo_fd,foo_path = tempfile.mkstemp()
@@ -60,10 +54,7 @@ def svn_make_test_repo():
         stdout=subprocess.DEVNULL
     )
     # *Finally*, we can create the SvnRepo object and return it.
-    return SvnRepo(name="test_repo",
-                   path=repo_url,
-                   trunk_head="trunk",
-                   trunk_tags="trunk_tags/*")
+    return svn_test_repo
 
 
 class TestRepo(unittest.TestCase):
