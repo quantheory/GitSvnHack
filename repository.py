@@ -88,6 +88,14 @@ class SvnRepo(Repo):
              "-m", "Creating trunk tags directory."]
         )
 
+    def trunk_import(self, file_path, repo_path, msg="Importing file."):
+        """Import a file into the repo, using a path relative to the
+        trunk's root. Should only be used for testing."""
+        subprocess.check_call(
+            ["svn", "import", file_path, self.trunk_head+"/"+repo_path,
+             "-q", "-m", msg]
+        )
+
 
 class GitRepo(Repo):
     """Git repository class."""

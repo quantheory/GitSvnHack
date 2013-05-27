@@ -79,11 +79,7 @@ def svn_make_test_repo():
     with TempFile() as foo_file:
         with foo_file.open("w") as foo:
             foo.write("bar1\n")
-        subprocess.check_call(
-            ["svn", "import", foo_file.path, repo_url+"/trunk/foo",
-             "-m", "Adding foo."],
-            stdout=subprocess.DEVNULL
-        )
+        svn_test_repo.trunk_import(foo_file.path, "foo", "Adding foo.")
 
     # Make a trunk tag.
     subprocess.check_call(
@@ -194,6 +190,22 @@ class TestSvnRepo(TestRepo):
         # is right.
         self.assertIn(get_path_start(self.trunk_head)+"/",sub_dirs)
         self.assertIn(get_path_start(self.trunk_tags)+"/",sub_dirs)
+
+    def test_trunk_import(self):
+        """Test that we can import a file into the SvnRepo's trunk."""
+        self.my_repo.create()
+        foo_path="foo"
+        foo_contents="bar"
+        with TempFile() as foo_file:
+            with foo_file.open("w") as foo:
+                foo.write(foo_contents)
+            self.my_repo.trunk_import(foo_file.path, foo_path)
+
+        svn_cat = subprocess.check_output(
+            ["svn","cat",self.my_repo.trunk_head+"/"+foo_path],
+            universal_newlines=True,
+        )
+        self.assertEqual(svn_cat, foo_contents)
 
 
 class TestGitRepo(TestRepo):
