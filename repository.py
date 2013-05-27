@@ -146,6 +146,7 @@ class GitSvnRepo(GitRepo):
         svn_trunk = self.svn_repo.trunk_branch
         subprocess.check_call(
             ["git", "svn", "clone", self.svn_repo.path,
-             "-T", svn_trunk.head, self.path],
+             "-T", svn_trunk.head, "-t", svn_trunk.tags, self.path],
             stdout=stdout, stderr=stderr,
+            env={},
         )

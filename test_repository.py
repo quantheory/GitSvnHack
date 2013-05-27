@@ -222,6 +222,7 @@ class TestGitRepo(TestRepo):
              "ls-files"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            env={},
         )
 
 
@@ -276,12 +277,20 @@ class TestGitSvnRepo(TestGitRepo):
 
     def test_clone(self):
         """Test GitSvnRepo's clone method."""
-        self.my_repo.clone(stdout=subprocess.DEVNULL,
-                           stderr=subprocess.DEVNULL)
+        self.my_repo.clone(subprocess.DEVNULL, subprocess.DEVNULL)
         foo_path = os.path.join(self.repo_path,"foo")
         with open(foo_path,"r") as foo_file:
             foo_contents = foo_file.read()
         self.assertEqual(foo_contents,"bar1\n")
+
+    def test_clone_tag(self):
+        """Test that GitSvnRepo.clone() pulls in tags."""
+        self.my_repo.clone(subprocess.DEVNULL, subprocess.DEVNULL)
+        subprocess.check_call(
+            ["git", "show-ref", "-q", "--verify", "refs/remotes/tags/v1"],
+            cwd=self.repo_path,
+            env={},
+        )
 
 
 if __name__ == "__main__":
