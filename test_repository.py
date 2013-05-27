@@ -120,6 +120,10 @@ class TestSvnRepo(TestRepo):
         args.setdefault("trunk_tags", self.trunk_tags)
         super().setUp(**args)
 
+    def tearDown(self):
+        shutil.rmtree(re.sub("^file://","",\
+                             self.repo_path))
+
     def test_trunk_head(self):
         """Test that SvnRepo objects provide trunk path."""
         self.assertEqual(self.my_repo.trunk_head,
@@ -139,10 +143,6 @@ class TestSvnRepo(TestRepo):
         self.assertEqual(trunk_branch.tags,
                          self.trunk_tags)
 
-    def tearDown(self):
-        shutil.rmtree(re.sub("^file://","",\
-                             self.repo_path))
-
 
 class TestGitRepo(TestRepo):
     """Test the "GitRepo" class."""
@@ -160,6 +160,11 @@ class TestGitSvnRepo(TestGitRepo):
         args.setdefault("svn_repo", self.my_svn_repo)
         super().setUp(**args)
 
+    def tearDown(self):
+        shutil.rmtree(re.sub("^file://","",
+                             self.my_svn_repo.path))
+        shutil.rmtree(self.repo_path)
+
     def test_svn_repo(self):
         """Check that the Subversion repo used to initialize a
         GitSvnRepo is preserved."""
@@ -173,11 +178,6 @@ class TestGitSvnRepo(TestGitRepo):
         with open(foo_path,"r") as foo_file:
             foo_contents = foo_file.read()
         self.assertEqual(foo_contents,"bar1\n")
-
-    def tearDown(self):
-        shutil.rmtree(re.sub("^file://","",
-                             self.my_svn_repo.path))
-        shutil.rmtree(self.repo_path)
 
 
 if __name__ == "__main__":
