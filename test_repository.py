@@ -15,10 +15,50 @@ from GitSvnHack.repository import Repo, SvnBranch, SvnRepo, \
 # Could do something sophisticated or elegant, but easiest to just
 # wrap Subversion's CLI.
 
-# For before Python 3.3, need this:
+# For Python 3.2, need to add some things that are already in 3.3:
 if sys.version_info[0:1] < (3,3):
     subprocess.DEVNULL = os.open(os.devnull,os.O_WRONLY)
+    FileNotFoundError = OSError
 
+class TempFile:
+    """Context manager class for files that exist only for one test, and
+    must be deleted afterward."""
+
+    def __init__(self):
+        pass
+
+    def __del__(self):
+        """Try to delete the file if we forgot along the way."""
+        self.delete()
+
+    @property
+    def path(self):
+        """Path to the file."""
+        return self._path
+
+    def open(self, *args):
+        """Open the file, passing all arguments to os.fdopen() and
+        returning the result."""
+        return os.fdopen(self._fd, *args)
+
+    def __enter__(self):
+        """Create a file."""
+        self._fd,self._path = tempfile.mkstemp()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Delete the file we created."""
+        self.delete()
+        return False
+
+    def delete(self):
+        """Delete the file."""
+        # If the file was already deleted, don't worry about it; ignore the
+        # exception.
+        try:
+            os.remove(self.path)
+        except FileNotFoundError:
+            pass
 
 def svn_make_test_repo():
     """Returns a URL corresponding to a locally created Subversion
@@ -36,16 +76,14 @@ def svn_make_test_repo():
     svn_test_repo.create()
 
     # Add a file.
-    foo_fd,foo_path = tempfile.mkstemp()
-    with os.fdopen(foo_fd,"w") as foo_file:
-        foo_file.write("bar1\n")
-    subprocess.check_call(
-        ["svn", "import", foo_path, repo_url+"/trunk/foo",
-         "-m", "Adding foo."],
-        stdout=subprocess.DEVNULL
-    )
-    # Remove local file
-    os.remove(foo_path)
+    with TempFile() as foo_file:
+        with foo_file.open("w") as foo:
+            foo.write("bar1\n")
+        subprocess.check_call(
+            ["svn", "import", foo_file.path, repo_url+"/trunk/foo",
+             "-m", "Adding foo."],
+            stdout=subprocess.DEVNULL
+        )
 
     # Make a trunk tag.
     subprocess.check_call(
