@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Classes for interaction with Subversion and Git repositories."""
 
+import re
 import subprocess
 
 
@@ -60,6 +61,32 @@ class SvnRepo(Repo):
     def trunk_branch(self):
         """SvnBranch object for trunk."""
         return self._trunk_branch
+
+    def create(self):
+        """Creates the repository it describes. Should only be used for
+        testing."""
+        local_path = re.sub("^file://", "", self.path)
+        subprocess.check_call(["svnadmin", "create", local_path])
+
+        # Create top level directories (trunk_head, then trunk_tags).
+        subprocess.check_call(
+            ["svn", "mkdir", self.trunk_head, "-q", \
+             "-m", "Creating trunk directory."]
+        )
+        # This is to ensure we only create until the first "*" or brace
+        # expansion. A smarter version would also create all directories
+        # in braces.
+        my_tags_dir = self.trunk_tags
+        glob_part_idx = my_tags_dir.find("*")
+        if glob_part_idx >= 0:
+            my_tags_dir = my_tags_dir[:glob_part_idx]
+        glob_part_idx = my_tags_dir.find("{")
+        if glob_part_idx >= 0:
+            my_tags_dir = my_tags_dir[:glob_part_idx]
+        subprocess.check_call(
+            ["svn", "mkdir", my_tags_dir, "-q", \
+             "-m", "Creating trunk tags directory."]
+        )
 
 
 class GitRepo(Repo):

@@ -143,6 +143,29 @@ class TestSvnRepo(TestRepo):
         self.assertEqual(trunk_branch.tags,
                          self.trunk_tags)
 
+    def test_create(self):
+        """Test that SvnRepo objects, when given a local directory, can
+        actually initialize a repo there."""
+        self.my_repo.create()
+        svn_ls = subprocess.check_output(["svn","ls",self.repo_path],
+                                       universal_newlines=True)
+        sub_dirs = svn_ls.splitlines()
+
+        def get_path_start(string):
+            """Returns everything before the first "/" in as string."""
+            idx = string.find("/")
+            # Return the string up to the index, or the whole string if
+            # there was no "/" (idx < 0).
+            if idx >= 0:
+                return string[:idx]
+            else:
+                return string
+
+        # Use get_path_start to make sure that the top level of the repo
+        # is right.
+        self.assertIn(get_path_start(self.trunk_head)+"/",sub_dirs)
+        self.assertIn(get_path_start(self.trunk_tags)+"/",sub_dirs)
+
 
 class TestGitRepo(TestRepo):
     """Test the "GitRepo" class."""
