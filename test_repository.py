@@ -114,6 +114,8 @@ class TestSvnRepo(TestRepo):
     trunk_tags = "trunk_tags/*"
 
     def setUp(self, **args):
+        # Different arguments for SvnRepo vs. the base Repo.
+        self.repo_path="file://"+tempfile.mkdtemp()
         args.setdefault("trunk_head", self.trunk_head)
         args.setdefault("trunk_tags", self.trunk_tags)
         super().setUp(**args)
@@ -136,6 +138,10 @@ class TestSvnRepo(TestRepo):
                          self.trunk_head)
         self.assertEqual(trunk_branch.tags,
                          self.trunk_tags)
+
+    def tearDown(self):
+        shutil.rmtree(re.sub("^file://","",\
+                             self.repo_path))
 
 
 class TestGitRepo(TestRepo):
