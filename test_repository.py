@@ -82,12 +82,9 @@ def svn_make_test_repo():
         svn_test_repo.trunk_import(foo_file.path, "foo", "Adding foo.")
 
     # Make a trunk tag.
-    subprocess.check_call(
-        ["svn", "cp", repo_url+"/trunk", repo_url+"/trunk_tags/v1",
-         "-m", "Making first trunk tag."],
-        stdout=subprocess.DEVNULL
-    )
-    # *Finally*, we can create the SvnRepo object and return it.
+    svn_test_repo.make_trunk_tag("v1", "Making first trunk tag.")
+
+    # *Finally*, we can return the SvnRepo object.
     return svn_test_repo
 
 
@@ -131,6 +128,18 @@ class TestSvnBranch(unittest.TestCase):
         self.assertEqual(self.my_branch.tags, self.tag_expr)
 
 
+# This is used for manipulating paths in some tests below.
+def get_path_start(string):
+    """Returns everything before the first "/" in as string."""
+    idx = string.find("/")
+    # Return the string up to the index, or the whole string if
+    # there was no "/" (idx < 0).
+    if idx >= 0:
+        return string[:idx]
+    else:
+        return string
+
+
 class TestSvnRepo(TestRepo):
     """Test the "SvnRepo" class."""
 
@@ -172,19 +181,9 @@ class TestSvnRepo(TestRepo):
         """Test that SvnRepo objects, when given a local directory, can
         actually initialize a repo there."""
         self.my_repo.create()
-        svn_ls = subprocess.check_output(["svn","ls",self.repo_path],
-                                       universal_newlines=True)
+        svn_ls = subprocess.check_output(["svn", "ls", self.repo_path],
+                                         universal_newlines=True)
         sub_dirs = svn_ls.splitlines()
-
-        def get_path_start(string):
-            """Returns everything before the first "/" in as string."""
-            idx = string.find("/")
-            # Return the string up to the index, or the whole string if
-            # there was no "/" (idx < 0).
-            if idx >= 0:
-                return string[:idx]
-            else:
-                return string
 
         # Use get_path_start to make sure that the top level of the repo
         # is right.
@@ -202,10 +201,24 @@ class TestSvnRepo(TestRepo):
             self.my_repo.trunk_import(foo_file.path, foo_path)
 
         svn_cat = subprocess.check_output(
-            ["svn","cat",self.my_repo.trunk_head+"/"+foo_path],
+            ["svn", "cat", self.my_repo.trunk_head+"/"+foo_path],
             universal_newlines=True,
         )
         self.assertEqual(svn_cat, foo_contents)
+
+    def test_make_trunk_tag(self):
+        """Test that we can make a trunk tag using an SvnRepo."""
+        self.my_repo.create()
+        tag_name = "v1"
+        self.my_repo.make_trunk_tag(tag_name)
+
+        svn_ls = subprocess.check_output(
+            ["svn", "ls",
+             self.repo_path+"/"+get_path_start(self.trunk_tags)],
+            universal_newlines=True,
+        )
+        sub_dirs = svn_ls.splitlines()
+        self.assertIn(tag_name+"/",sub_dirs)
 
 
 class TestGitRepo(TestRepo):

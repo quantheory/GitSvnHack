@@ -96,6 +96,22 @@ class SvnRepo(Repo):
              "-q", "-m", msg]
         )
 
+    def make_trunk_tag(self, tag_name, msg="Making tag."):
+        """Copy the trunk into "tag_name" in the trunk_tags directory.
+        Should only be used for testing."""
+        # Deal with globs and such, as above.
+        my_tags_dir = self.trunk_tags
+        glob_part_idx = my_tags_dir.find("*")
+        if glob_part_idx >= 0:
+            my_tags_dir = my_tags_dir[:glob_part_idx]
+        glob_part_idx = my_tags_dir.find("{")
+        if glob_part_idx >= 0:
+            my_tags_dir = my_tags_dir[:glob_part_idx]
+        # Copy to the tag name.
+        subprocess.check_call(
+            ["svn", "cp", self.trunk_head, my_tags_dir+"/"+tag_name,
+             "-q", "-m", msg]
+        )
 
 class GitRepo(Repo):
     """Git repository class."""
