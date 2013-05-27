@@ -53,8 +53,7 @@ class SvnRepo(Repo):
 
     @property
     def trunk_tags(self):
-        """Glob expression for the URLs corresponding to trunk
-        tags."""
+        """Glob expression for the URLs corresponding to trunk tags."""
         return self.path+"/"+self._trunk_branch.tags
 
     @property
@@ -113,10 +112,22 @@ class SvnRepo(Repo):
              "-q", "-m", msg]
         )
 
+
 class GitRepo(Repo):
     """Git repository class."""
+
     def __init__(self, **args):
         super().__init__(**args)
+
+    def init(self, stdout=None, stderr=None):
+        """Initialize a Git repository."""
+        # Have to wipe the enviroment so that we don't pick up a spurious
+        # GIT_DIR from testing hooks.
+        subprocess.check_call(
+            ["git", "init", self.path],
+            stdout=stdout, stderr=stderr,
+            env={},
+        )
 
 
 class GitSvnRepo(GitRepo):

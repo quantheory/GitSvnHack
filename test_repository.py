@@ -214,6 +214,16 @@ class TestGitRepo(TestRepo):
         shutil.rmtree(self.repo_path)
         super().tearDown(**args)
 
+    def test_init(self):
+        """Test that using init on a GitRepo actually creates a repo."""
+        self.my_repo.init(subprocess.DEVNULL, subprocess.DEVNULL)
+        subprocess.check_call(
+            ["git", "--git-dir="+os.path.join(self.repo_path,".git"),
+             "ls-files"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
 
 @contextlib.contextmanager
 def SvnTestRepo():
