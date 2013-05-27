@@ -75,6 +75,10 @@ class TestRepo(unittest.TestCase):
         args.setdefault("path",self.repo_path)
         self.my_repo = self.repo_class(**args)
 
+    def tearDown(self, **args):
+        """Exists only to be called with super()."""
+        pass
+
     def test_name(self):
         """Test that Repo objects retain names from __init__."""
         self.assertEqual(self.my_repo.name, self.repo_name)
@@ -130,9 +134,10 @@ class TestSvnRepo(TestRepo):
         args.setdefault("trunk_tags", self.trunk_tags)
         super().setUp(**args)
 
-    def tearDown(self):
+    def tearDown(self, **args):
         shutil.rmtree(re.sub("^file://","",\
                              self.repo_path))
+        super().tearDown(**args)
 
     def test_trunk_head(self):
         """Test that SvnRepo objects provide trunk path."""
@@ -201,6 +206,14 @@ class TestGitRepo(TestRepo):
     """Test the "GitRepo" class."""
     repo_class = GitRepo
 
+    def setUp(self, **args):
+        self.repo_path = tempfile.mkdtemp()
+        super().setUp(**args)
+
+    def tearDown(self, **args):
+        shutil.rmtree(self.repo_path)
+        super().tearDown(**args)
+
 
 @contextlib.contextmanager
 def SvnTestRepo():
@@ -237,15 +250,14 @@ class TestGitSvnRepo(TestGitRepo):
     repo_class = GitSvnRepo
 
     def setUp(self, **args):
-        self.repo_path = tempfile.mkdtemp()
         self.svn_test_repo = SvnTestRepo()
         self.my_svn_repo = self.svn_test_repo.__enter__()
         args.setdefault("svn_repo", self.my_svn_repo)
         super().setUp(**args)
 
-    def tearDown(self):
+    def tearDown(self, **args):
         self.svn_test_repo.__exit__(None, None, None)
-        shutil.rmtree(self.repo_path)
+        super().tearDown(**args)
 
     def test_svn_repo(self):
         """Check that the Subversion repo used to initialize a
