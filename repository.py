@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-"""Classes for interaction with Subversion and Git repositories."""
+"""Classes for interaction with Subversion and Git repositories.
+
+Classes:
+Repo - Repository base class.
+SvnBranch - Identifies a branch in a Subversion repository.
+SvnRepo - Subversion repository class.
+GitRepo - Git repository class.
+GitSvnRepo - git-svn repository class.
+
+"""
 
 import re
 import subprocess
@@ -7,10 +16,7 @@ import subprocess
 
 class Repo:
 
-    """Base repository class
-
-    All instance variables must be specified at initialization, and are
-    read-only.
+    """Base class for all repository objects.
 
     Public instance variables:
     name - The repository's name.
@@ -43,10 +49,7 @@ class Repo:
 
 class SvnBranch:
 
-    """Relative paths to a Subversion branch and its tags.
-
-    All instance variables must be specified at initialization, and are
-    read-only.
+    """Provides relative paths to a Subversion branch and its tags.
 
     Public instance variables:
     head - Relative path to the branch's head.
@@ -55,7 +58,7 @@ class SvnBranch:
     """
 
     def __init__(self, head, tags):
-        """Sets the strings used to locate the branch.
+        """Set the strings used to locate the branch.
 
         Keyword arguments:
         head - Sets the "head" attribute.
@@ -89,7 +92,7 @@ class SvnBranch:
 
 class SvnRepo(Repo):
 
-    """Subversion repository class
+    """Provides information about a Subversion repository.
 
     Strictly speaking, this class is not intended to describe an entire
     Subversion repository containing multiple projects, but instead is for
@@ -135,21 +138,21 @@ class SvnRepo(Repo):
 
     @property
     def trunk_head(self):
-        """URL for the repo's trunk."""
+        """The full URL to the head of the project's trunk."""
         return self.path+"/"+self._trunk_branch.head
 
     @property
     def trunk_tags(self):
-        """Glob expression for the URLs corresponding to trunk tags."""
+        """Glob expression for URLs corresponding to the trunk's tags."""
         return self.path+"/"+self._trunk_branch.tags
 
     @property
     def trunk_branch(self):
-        """SvnBranch object for trunk."""
+        """SvnBranch object corresponding to the project's trunk."""
         return self._trunk_branch
 
     def create(self):
-        """Creates the repository it describes.
+        """Create the repository.
 
         Should only be used for testing.
 
@@ -212,13 +215,40 @@ class SvnRepo(Repo):
 
 
 class GitRepo(Repo):
-    """Git repository class."""
+
+    """Class to describe and manipulate Git repositories.
+
+    This class extends the Repo class with git-specific operations.
+    This is expected to be useful in the future, but currently has no well-
+    defined purpose, so it is a really just a stub.
+
+    Neither this class nor GitSvnRepo check conditions closely yet, e.g. to
+    detect whether a repository already exists before running init or
+    clone.
+
+    Public methods:
+    init - Create the repository.
+
+    """
 
     def __init__(self, **args):
+        """Wrap the Repo constructor."""
         super().__init__(**args)
 
     def init(self, stdout=None, stderr=None):
-        """Initialize a Git repository."""
+        """Initialize a Git repository.
+
+        This creates an empty repository at the path specified during this
+        object's creation.
+
+        Arguments:
+        stdout - Standard output for the git init call. Passed directly to
+                 subprocess.check_call().
+        stderr - Same as stdout, only for output to standard error.
+
+        """
+        # TODO: Perhaps this function should also write the repository name
+        # to ".git/description"?
         # Have to wipe the enviroment so that we don't pick up a spurious
         # GIT_DIR from testing hooks.
         subprocess.check_call(
@@ -229,19 +259,52 @@ class GitRepo(Repo):
 
 
 class GitSvnRepo(GitRepo):
-    """git-svn repository class."""
+
+    """Class to describe and manipulate git-svn repositories.
+
+    Extend GitRepo with information about an upstream Subversion
+    repository, and methods that interact with git-svn.
+
+    git-svn repositories with multiple Subversion remotes are currently not
+    handled.
+
+    Public instance variables:
+    svn_repo - An SvnRepo object corresponding to the upstream repo.
+
+    Public methods:
+    clone - Use "git svn clone" to create this repository.
+
+    """
+
     def __init__(self, *, svn_repo, **args):
+        """Extend the GitRepo constructor by accepting a SvnRepo.
+
+        New keyword arguments:
+        svn_repo - An SvnRepo object defining the upstream Subversion
+                   repository.
+
+        """
         self._svn_repo = svn_repo
         super().__init__(**args)
 
     @property
     def svn_repo(self):
-        """Subversion repository corresponding to this GitSvnRepo."""
+        """Subversion repository upstream of this GitSvnRepo."""
         return self._svn_repo
 
     def clone(self, stdout=None, stderr=None):
-        """Use "git svn clone" to clone the repo."""
+        """Create a Git clone of a Subversion repository with git-svn.
+
+        Arguments:
+        stdout - Standard output for the git svn call. Passed directly to
+                 subprocess.check_call().
+        stderr - Same as stdout, only for output to standard error.
+
+        """
         svn_trunk = self.svn_repo.trunk_branch
+        # Note that we should clear the environment in case it has
+        # something weird, like GIT_DIR being set to a different
+        # repository.
         subprocess.check_call(
             ["git", "svn", "clone", self.svn_repo.path,
              "-T", svn_trunk.head, "-t", svn_trunk.tags, self.path],
