@@ -270,6 +270,9 @@ def SvnTestRepo():
             bad.write("BADTOTHEBONE\n")
         svn_test_repo.trunk_import(bad_file.path, "bad", "Evil commit.")
 
+    # Make a trunk tag.
+    svn_test_repo.make_trunk_tag("bad_tag", "Making bad trunk tag.")
+
     svn_test_repo.trunk_rm("bad", "Undo evil.")
 
     # Add a file.
@@ -290,18 +293,28 @@ def SvnTestRepo():
 
 
 class TestGitSvnRepo(TestGitRepo):
-    """Test the "GitSvnRepo" class."""
+    """Test the "GitSvnRepo" class.
+
+    Only for tests that don't make changes to the upstream Subversion repo.
+
+    """
 
     repo_class = GitSvnRepo
 
+    @classmethod
+    def setUpClass(cls, **args):
+        cls.svn_test_repo = SvnTestRepo()
+        cls.my_svn_repo = cls.svn_test_repo.__enter__()
+
+    @classmethod
+    def tearDownClass(cls, **args):
+        cls.svn_test_repo.__exit__(None, None, None)
+
     def setUp(self, **args):
-        self.svn_test_repo = SvnTestRepo()
-        self.my_svn_repo = self.svn_test_repo.__enter__()
         args.setdefault("svn_repo", self.my_svn_repo)
         super().setUp(**args)
 
     def tearDown(self, **args):
-        self.svn_test_repo.__exit__(None, None, None)
         super().tearDown(**args)
 
     def test_svn_repo(self):
