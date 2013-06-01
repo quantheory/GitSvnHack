@@ -282,6 +282,7 @@ class GitSvnRepo(GitRepo):
 
     Public methods:
     clone - Use "git svn clone" to create this repository.
+    rebase - Use "git svn rebase" to update this repository.
 
     """
 
@@ -319,5 +320,19 @@ class GitSvnRepo(GitRepo):
             ["git", "svn", "clone", self.svn_repo.path,
              "-T", svn_trunk.head, "-t", svn_trunk.tags,
              "-r","BASE:"+str(revision), self.path],
+            **args
+        )
+
+    def rebase(self, **args):
+        """Update this repository from its Subversion upstream.
+
+        Any keyword arguments provided are passed to
+        subprocess.check_call().
+
+        """
+        svn_trunk = self.svn_repo.trunk_branch
+        subprocess.check_call(
+            ["git", "svn", "rebase"],
+            cwd=self.path,
             **args
         )

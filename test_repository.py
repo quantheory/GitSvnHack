@@ -347,6 +347,27 @@ class TestGitSvnRepo(TestGitRepo):
         self.assertIn("bad", sub_dirs)
         self.assertNotIn("foo", sub_dirs)
 
+    def test_rebase(self):
+        """Test GitSvnRepo.rebase() updates the repository."""
+        self.my_repo.clone(
+            revision=3,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env={},
+        )
+
+        self.my_repo.rebase(
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env={},
+        )
+
+        sub_dirs = os.listdir(self.repo_path)
+
+        # After an update, should have foo, but not the bad file.
+        self.assertNotIn("bad", sub_dirs)
+        self.assertIn("foo", sub_dirs)
+
 
 if __name__ == "__main__":
     unittest.main()
