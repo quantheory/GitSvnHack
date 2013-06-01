@@ -115,6 +115,7 @@ class SvnRepo(Repo):
     Repository interaction methods (testing only):
     create - Create a local repository corresponding to this object.
     trunk_import - Import a file to the trunk.
+    trunk_rm - Remove a file from the trunk.
     make_trunk_tag - Tag the current trunk by making a copy in the trunk
                      tags directory.
 
@@ -190,6 +191,19 @@ class SvnRepo(Repo):
         """
         subprocess.check_call(
             ["svn", "import", file_path, self.trunk_head+"/"+repo_path,
+             "-q", "-m", msg]
+        )
+
+    def trunk_rm(self, repo_path, msg="Removing file."):
+        """Remove a file from the repo's trunk.
+
+        Accepts a path relative to the trunk's root.
+
+        Should only be used for testing.
+
+        """
+        subprocess.check_call(
+            ["svn", "rm", self.trunk_head+"/"+repo_path,
              "-q", "-m", msg]
         )
 

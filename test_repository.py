@@ -187,6 +187,26 @@ class TestSvnRepo(TestRepo):
         )
         self.assertEqual(svn_cat, foo_contents)
 
+    def test_trunk_rm(self):
+        """Test that we can remove a file from SvnRepo's trunk."""
+        self.my_repo.create()
+        foo_path="foo"
+        foo_contents="bar"
+        with TempFile() as foo_file:
+            with foo_file.open("w") as foo:
+                foo.write(foo_contents)
+            self.my_repo.trunk_import(foo_file.path, foo_path)
+
+        self.my_repo.trunk_rm(foo_path)
+
+        svn_ls = subprocess.check_output(
+            ["svn", "ls",
+             self.my_repo.trunk_head],
+            universal_newlines=True,
+        )
+        sub_dirs = svn_ls.splitlines()
+        self.assertNotIn(foo_path, sub_dirs)
+
     def test_make_trunk_tag(self):
         """Test that we can make a trunk tag using an SvnRepo."""
         self.my_repo.create()
@@ -241,6 +261,15 @@ def SvnTestRepo():
                             trunk_head="trunk",
                             trunk_tags="trunk_tags/*")
     svn_test_repo.create()
+
+    # For now, just assume that the above is revision 2. Then this is
+    # revision 3.
+    with TempFile() as bad_file:
+        with bad_file.open("w") as bad:
+            bad.write("BADTOTHEBONE\n")
+        svn_test_repo.trunk_import(bad_file.path, "bad", "Evil commit.")
+
+    svn_test_repo.trunk_rm("bad", "Undo evil.")
 
     # Add a file.
     with TempFile() as foo_file:
