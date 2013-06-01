@@ -235,16 +235,14 @@ class GitRepo(Repo):
         """Wrap the Repo constructor."""
         super().__init__(**args)
 
-    def init(self, stdout=None, stderr=None):
+    def init(self, **args):
         """Initialize a Git repository.
 
         This creates an empty repository at the path specified during this
         object's creation.
 
-        Arguments:
-        stdout - Standard output for the git init call. Passed directly to
-                 subprocess.check_call().
-        stderr - Same as stdout, only for output to standard error.
+        Any keyword arguments provided are passed to
+        subprocess.check_call().
 
         """
         # TODO: Perhaps this function should also write the repository name
@@ -253,8 +251,7 @@ class GitRepo(Repo):
         # GIT_DIR from testing hooks.
         subprocess.check_call(
             ["git", "init", self.path],
-            stdout=stdout, stderr=stderr,
-            env={},
+            **args
         )
 
 
@@ -292,13 +289,11 @@ class GitSvnRepo(GitRepo):
         """Subversion repository upstream of this GitSvnRepo."""
         return self._svn_repo
 
-    def clone(self, stdout=None, stderr=None):
+    def clone(self, **args):
         """Create a Git clone of a Subversion repository with git-svn.
 
-        Arguments:
-        stdout - Standard output for the git svn call. Passed directly to
-                 subprocess.check_call().
-        stderr - Same as stdout, only for output to standard error.
+        Any keyword arguments provided are passed to
+        subprocess.check_call().
 
         """
         svn_trunk = self.svn_repo.trunk_branch
@@ -308,6 +303,5 @@ class GitSvnRepo(GitRepo):
         subprocess.check_call(
             ["git", "svn", "clone", self.svn_repo.path,
              "-T", svn_trunk.head, "-t", svn_trunk.tags, self.path],
-            stdout=stdout, stderr=stderr,
-            env={},
+            **args
         )

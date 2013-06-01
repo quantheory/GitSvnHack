@@ -216,7 +216,11 @@ class TestGitRepo(TestRepo):
 
     def test_init(self):
         """Test that using init on a GitRepo actually creates a repo."""
-        self.my_repo.init(subprocess.DEVNULL, subprocess.DEVNULL)
+        self.my_repo.init(
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env={},
+        )
         subprocess.check_call(
             ["git", "--git-dir="+os.path.join(self.repo_path,".git"),
              "ls-files"],
@@ -277,7 +281,11 @@ class TestGitSvnRepo(TestGitRepo):
 
     def test_clone(self):
         """Test GitSvnRepo's clone method."""
-        self.my_repo.clone(subprocess.DEVNULL, subprocess.DEVNULL)
+        self.my_repo.clone(
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env={},
+        )
         foo_path = os.path.join(self.repo_path,"foo")
         with open(foo_path,"r") as foo_file:
             foo_contents = foo_file.read()
@@ -285,7 +293,11 @@ class TestGitSvnRepo(TestGitRepo):
 
     def test_clone_tag(self):
         """Test that GitSvnRepo.clone() pulls in tags."""
-        self.my_repo.clone(subprocess.DEVNULL, subprocess.DEVNULL)
+        self.my_repo.clone(
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env={},
+        )
         subprocess.check_call(
             ["git", "show-ref", "-q", "--verify", "refs/remotes/tags/v1"],
             cwd=self.repo_path,
