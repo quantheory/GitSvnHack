@@ -333,6 +333,20 @@ class TestGitSvnRepo(TestGitRepo):
             env={},
         )
 
+    def test_clone_revision(self):
+        """Test that GitSvnRepo.clone() respects the revision argument."""
+        self.my_repo.clone(
+            revision=3,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env={},
+        )
+        sub_dirs = os.listdir(self.repo_path)
+
+        # At revision 3, we have the bad file, but not foo.
+        self.assertIn("bad", sub_dirs)
+        self.assertNotIn("foo", sub_dirs)
+
 
 if __name__ == "__main__":
     unittest.main()

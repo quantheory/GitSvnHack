@@ -261,8 +261,6 @@ class GitRepo(Repo):
         """
         # TODO: Perhaps this function should also write the repository name
         # to ".git/description"?
-        # Have to wipe the enviroment so that we don't pick up a spurious
-        # GIT_DIR from testing hooks.
         subprocess.check_call(
             ["git", "init", self.path],
             **args
@@ -303,19 +301,23 @@ class GitSvnRepo(GitRepo):
         """Subversion repository upstream of this GitSvnRepo."""
         return self._svn_repo
 
-    def clone(self, **args):
+    def clone(self, revision=None, **args):
         """Create a Git clone of a Subversion repository with git-svn.
 
-        Any keyword arguments provided are passed to
+        Arguments:
+        revision - The latest revision to use; everything up to this point
+                   will be cloned.
+
+        Any additional keyword arguments provided are passed to
         subprocess.check_call().
 
         """
+        if revision is None:
+            revision = "HEAD"
         svn_trunk = self.svn_repo.trunk_branch
-        # Note that we should clear the environment in case it has
-        # something weird, like GIT_DIR being set to a different
-        # repository.
         subprocess.check_call(
             ["git", "svn", "clone", self.svn_repo.path,
-             "-T", svn_trunk.head, "-t", svn_trunk.tags, self.path],
+             "-T", svn_trunk.head, "-t", svn_trunk.tags,
+             "-r","BASE:"+str(revision), self.path],
             **args
         )
