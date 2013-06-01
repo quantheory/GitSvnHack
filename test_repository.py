@@ -222,10 +222,17 @@ class TestSvnRepo(TestRepo):
         self.assertIn(tag_name+"/",sub_dirs)
 
 
+# This is used to tame the test output, and to clear the environment so
+# that tests can be run from a git hook.
+_git_cmd_args = {
+    "stdout": subprocess.DEVNULL,
+    "stderr": subprocess.DEVNULL,
+    "env": {},
+}
+
 class TestGitRepo(TestRepo):
     """Test the "GitRepo" class."""
     repo_class = GitRepo
-
     def setUp(self, **args):
         self.repo_path = tempfile.mkdtemp()
         super().setUp(**args)
@@ -236,17 +243,11 @@ class TestGitRepo(TestRepo):
 
     def test_init(self):
         """Test that using init on a GitRepo actually creates a repo."""
-        self.my_repo.init(
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            env={},
-        )
+        self.my_repo.init(**_git_cmd_args)
         subprocess.check_call(
             ["git", "--git-dir="+os.path.join(self.repo_path,".git"),
              "ls-files"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            env={},
+            **_git_cmd_args
         )
 
 
@@ -310,11 +311,8 @@ class TestGitSvnRepo(TestGitRepo):
 
     def test_clone(self):
         """Test GitSvnRepo's clone method."""
-        self.my_repo.clone(
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            env={},
-        )
+        self.my_repo.clone(**_git_cmd_args)
+
         foo_path = os.path.join(self.repo_path,"foo")
         with open(foo_path,"r") as foo_file:
             foo_contents = foo_file.read()
@@ -322,24 +320,18 @@ class TestGitSvnRepo(TestGitRepo):
 
     def test_clone_tag(self):
         """Test that GitSvnRepo.clone() pulls in tags."""
-        self.my_repo.clone(
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            env={},
-        )
+        self.my_repo.clone(**_git_cmd_args)
         subprocess.check_call(
             ["git", "show-ref", "-q", "--verify", "refs/remotes/tags/v1"],
             cwd=self.repo_path,
-            env={},
+            **_git_cmd_args
         )
 
     def test_clone_revision(self):
         """Test that GitSvnRepo.clone() respects the revision argument."""
         self.my_repo.clone(
             revision=3,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            env={},
+            **_git_cmd_args
         )
         sub_dirs = os.listdir(self.repo_path)
 
@@ -351,16 +343,10 @@ class TestGitSvnRepo(TestGitRepo):
         """Test GitSvnRepo.rebase() updates the repository."""
         self.my_repo.clone(
             revision=3,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            env={},
+            **_git_cmd_args
         )
 
-        self.my_repo.rebase(
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            env={},
-        )
+        self.my_repo.rebase(**_git_cmd_args)
 
         sub_dirs = os.listdir(self.repo_path)
 
