@@ -268,20 +268,24 @@ class GitRepo(Repo):
         """Wrap the Repo constructor."""
         super().__init__(**args)
 
-    def init(self, **args):
+    def init(self, git_args=[], **args):
         """Initialize a Git repository.
 
         This creates an empty repository at the path specified during this
         object's creation.
 
-        Any keyword arguments provided are passed to
+        Arguments:
+        git_args - An iterable yielding additional arguments for the git
+                   init command.
+
+        Any other keyword arguments provided are passed to
         subprocess.check_call().
 
         """
         # TODO: Perhaps this function should also write the repository name
         # to ".git/description"?
         subprocess.check_call(
-            ["git", "init", self.path],
+            ["git", "init", self.path]+git_args,
             **args
         )
 
@@ -325,10 +329,15 @@ class GitSvnRepo(GitRepo):
         """Subversion repository upstream of this GitSvnRepo."""
         return self._svn_repo
 
-    def get_svn_revision(self, **args):
+    def get_svn_revision(self, git_args=[], **args):
         """Get the Subversion revision upstream of the working copy.
 
-        All keyword arguments are passed to subprocess.check_output().
+        Arguments:
+        git_args - An iterable yielding additional arguments for the git
+                   init command.
+
+        All other keyword arguments are passed to
+        subprocess.check_output().
         If given, stdout will be stripped out, since that allows you to
         specify the same arguments here as for the other methods in this
         class.
@@ -346,7 +355,7 @@ class GitSvnRepo(GitRepo):
         if "stdout" in output_args:
             del output_args["stdout"]
         git_svn_info = subprocess.check_output(
-            ["git", "svn", "info"],
+            ["git", "svn", "info"]+git_args,
             cwd=self.path,
             universal_newlines=True,
             **output_args
@@ -354,12 +363,14 @@ class GitSvnRepo(GitRepo):
 
         return int(_svn_info_regex.search(git_svn_info).group("revision"))
 
-    def clone(self, revision=None, **args):
+    def clone(self, revision=None, git_args=[], **args):
         """Create a Git clone of a Subversion repository with git-svn.
 
         Arguments:
         revision - The latest revision to use; everything up to this point
                    will be cloned.
+        git_args - An iterable yielding additional arguments for the git
+                   clone command.
 
         Any additional keyword arguments provided are passed to
         subprocess.check_call().
@@ -385,18 +396,21 @@ class GitSvnRepo(GitRepo):
         subprocess.check_call(
             ["git", "svn", "clone", self.svn_repo.path,
              "-T", svn_trunk.head, "-t", svn_trunk.tags,
-             "-r", "BASE:"+str(clone_revision), self.path],
+             "-r", "BASE:"+str(clone_revision),
+             self.path]+git_args,
             **args
         )
         if rebase_revision is not None:
             self.rebase(revision=rebase_revision, **args)
 
-    def rebase(self, revision=None, **args):
+    def rebase(self, revision=None, git_args=[], **args):
         """Update this repository from its Subversion upstream.
 
         Arguments:
         revision - The revision to rebase onto. Must be between the current
                    revision and HEAD. Defaults to HEAD.
+        git_args - An iterable yielding additional arguments for the git
+                   fetch command(s).
 
         Any additional keyword arguments provided are passed to
         subprocess.check_call().
@@ -414,7 +428,7 @@ class GitSvnRepo(GitRepo):
                 continue
             subprocess.check_call(
                 ["git", "svn", "fetch",
-                 "-r", str(next_revision)+":"+str(irev)],
+                 "-r", str(next_revision)+":"+str(irev)]+git_args,
                 cwd=self.path,
                 **args
             )
@@ -424,12 +438,12 @@ class GitSvnRepo(GitRepo):
             revision="HEAD"
         subprocess.check_call(
             ["git", "svn", "fetch",
-             "-r", str(next_revision)+":"+str(revision)],
+             "-r", str(next_revision)+":"+str(revision)]+git_args,
             cwd=self.path,
             **args
         )
 
-        # Finally, rebase
+        # Finally, rebase.
         subprocess.check_call(
             ["git", "svn", "rebase", "--local"],
             cwd=self.path,
