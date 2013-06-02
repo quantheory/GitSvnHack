@@ -300,6 +300,7 @@ class TestGitSvnRepo(TestGitRepo):
     """
 
     repo_class = GitSvnRepo
+    ignore_revs = (4,)
 
     @classmethod
     def setUpClass(cls, **args):
@@ -312,6 +313,7 @@ class TestGitSvnRepo(TestGitRepo):
 
     def setUp(self, **args):
         args.setdefault("svn_repo", self.my_svn_repo)
+        args.setdefault("ignore_revs", self.ignore_revs)
         super().setUp(**args)
 
     def tearDown(self, **args):
@@ -353,7 +355,7 @@ class TestGitSvnRepo(TestGitRepo):
         self.assertNotIn("foo", sub_dirs)
 
     def test_rebase(self):
-        """Test GitSvnRepo.rebase() updates the repository."""
+        """Test that GitSvnRepo.rebase() updates the repository."""
         self.my_repo.clone(
             revision=3,
             **_git_cmd_args
@@ -366,6 +368,19 @@ class TestGitSvnRepo(TestGitRepo):
         # After an update, should have foo, but not the bad file.
         self.assertNotIn("bad", sub_dirs)
         self.assertIn("foo", sub_dirs)
+
+    def test_ignore_revs(self):
+        """Test that GitSvnRepo.clone skips ignored revisions."""
+        self.my_repo.clone(**_git_cmd_args)
+
+        # If revision 4 was skipped, "bad_tag" should be missing.
+        with self.assertRaises(subprocess.CalledProcessError):
+            subprocess.check_call(
+                ["git", "show-ref", "-q", "--verify",
+                 "refs/remotes/tags/bad_tag"],
+                cwd=self.repo_path,
+                **_git_cmd_args
+            )
 
 
 if __name__ == "__main__":

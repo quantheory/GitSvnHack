@@ -286,15 +286,18 @@ class GitSvnRepo(GitRepo):
 
     """
 
-    def __init__(self, *, svn_repo, **args):
+    def __init__(self, *, svn_repo, ignore_revs=(), **args):
         """Extend the GitRepo constructor by accepting a SvnRepo.
 
         New keyword arguments:
         svn_repo - An SvnRepo object defining the upstream Subversion
                    repository.
+        ignore_revs - A sequence containing upstream revisions to ignore.
+                      Defaults to an empty tuple.
 
         """
         self._svn_repo = svn_repo
+        self._ignore_revs = sorted(ignore_revs)
         super().__init__(**args)
 
     @property
@@ -313,26 +316,91 @@ class GitSvnRepo(GitRepo):
         subprocess.check_call().
 
         """
-        if revision is None:
-            revision = "HEAD"
+        rebase_revision = None
+        if len(self._ignore_revs) > 0:
+            if revision is not None:
+                if revision > self._ignore_revs[0]:
+                    clone_revision = self._ignore_revs[0] - 1
+                    rebase_revision = revision
+                else:
+                    clone_revision = revision
+            else:
+                clone_revision = self._ignore_revs[0] - 1
+                rebase_revision = "HEAD"
+        else:
+            if revision is not None:
+                clone_revision = revision
+            else:
+                clone_revision = "HEAD"
         svn_trunk = self.svn_repo.trunk_branch
         subprocess.check_call(
             ["git", "svn", "clone", self.svn_repo.path,
              "-T", svn_trunk.head, "-t", svn_trunk.tags,
-             "-r","BASE:"+str(revision), self.path],
+             "-r", "BASE:"+str(clone_revision), self.path],
             **args
         )
+        if rebase_revision is not None:
+            self.rebase(revision=rebase_revision, **args)
 
-    def rebase(self, **args):
+    def rebase(self, revision=None, **args):
         """Update this repository from its Subversion upstream.
 
-        Any keyword arguments provided are passed to
+        Arguments:
+        revision - The revision to rebase onto. Must be between the current
+                   revision and HEAD. Defaults to HEAD.
+
+        Any additional keyword arguments provided are passed to
         subprocess.check_call().
 
         """
         svn_trunk = self.svn_repo.trunk_branch
+
+        # Parse the output of "git svn info" to get the current revision.
+        # It's not clear whether we should really do this, or use git
+        # rev-list. It's better to script around plumbing rather than
+        # porcelain, but the nature of this project requires making an
+        # exception for git-svn anyway.
+        #
+        # Since we have to capture this output, strip stdout from args we
+        # were given.
+        output_args = args.copy()
+        del output_args["stdout"]
+        git_svn_info = subprocess.check_output(
+            ["git", "svn", "info"],
+            cwd=self.path,
+            universal_newlines=True,
+            **output_args
+        )
+
+        next_revision = int(re.search("Revision: (\d+)",
+                                      git_svn_info).group(1)) + 1
+
+        for irev in self._ignore_revs:
+            if irev < next_revision:
+                continue
+            if irev == next_revision:
+                next_revision += 1
+                continue
+            subprocess.check_call(
+                ["git", "svn", "fetch",
+                 "-r", str(next_revision)+":"+str(irev)],
+                cwd=self.path,
+                **args
+            )
+            next_revision = irev+1
+
+        if revision is None:
+            revision="HEAD"
         subprocess.check_call(
-            ["git", "svn", "rebase"],
+            ["git", "svn", "fetch",
+             "-r", str(next_revision)+":"+str(revision)],
+            cwd=self.path,
+            **args
+        )
+
+        # Finally, rebase
+        subprocess.check_call(
+            ["git", "svn", "rebase", "--local"],
             cwd=self.path,
             **args
         )
