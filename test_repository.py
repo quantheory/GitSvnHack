@@ -498,6 +498,24 @@ class TestGitSvnRepo(TestGitRepo):
         self.assertNotIn("bad", sub_dirs)
         self.assertIn("foo", sub_dirs)
 
+    def test_rebase_ignore_revs(self):
+        """Test that GitSvnRepo.rebase skips ignored revisions."""
+        self.my_repo.clone(
+            revision=1,
+            **_git_cmd_args
+        )
+
+        self.my_repo.rebase(**_git_cmd_args)
+
+        # If revision 4 was skipped, "bad_tag" should be missing.
+        with self.assertRaises(subprocess.CalledProcessError):
+            subprocess.check_call(
+                ["git", "show-ref", "-q", "--verify",
+                 "refs/remotes/tags/bad_tag"],
+                cwd=self.repo_path,
+                **_git_cmd_args
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

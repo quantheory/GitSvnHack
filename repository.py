@@ -428,7 +428,7 @@ class GitSvnRepo(GitRepo):
                 continue
             subprocess.check_call(
                 ["git", "svn", "fetch",
-                 "-r", str(next_revision)+":"+str(irev)]+git_args,
+                 "-r", str(next_revision)+":"+str(irev-1)]+git_args,
                 cwd=self.path,
                 **args
             )
