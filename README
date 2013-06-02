@@ -1,6 +1,0 @@
-GitSvnHack is (or will be) a set of tools for managing git-svn
-repositories with svn:externals.
-
-License: GPL version 3 or any later version
-
-Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>

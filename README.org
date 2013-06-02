@@ -1,0 +1,35 @@
+
+#+startup: content
+
+GitSvnHack is (or will be) a set of tools for managing git-svn
+repositories with svn:externals.
+
+License: GPL version 3 or any later version
+
+Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
+
+* To-do list
+
+** TODO Wrap more git-svn commands
+
+   - [ ] init
+   - [ ] clone
+   - [ ] fetch
+   - [ ] rebase
+
+** TODO Major features
+
+   - [ ] Look at the output from git-svn to make sure I really have all the
+     options in the wrappers.
+   - [ ] Get clones of git-svn repositories working (creating a clone with
+   the Subversion repository as upstream, not the git-svn one).
+   - [ ] Split out subdirectories as if they were externals
+   - [ ] The actual external handling
+   - [ ] Handle svn:ignore
+
+** TODO Migration
+
+   - [ ] Create a "migrate" command to convert svnhack's external handling
+     to submodules.
+   - [ ] Handle authors file.
+   - [ ] Convert svn:ignore to .gitignore
