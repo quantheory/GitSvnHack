@@ -10,6 +10,7 @@ The package __init__.py is also the script to be run as git-svnhack.
 
 if __name__ == "__main__":
     from getopt import gnu_getopt
+    from itertools import chain
     import os
     import subprocess
     import sys
@@ -34,8 +35,8 @@ if __name__ == "__main__":
         "trunk=", "tags=", "branches=", "stdlayout",
         "use-svm-props", "use-svnsync-props",
         "rewrite-root=", "rewrite-uuid=",
-        "username=", "no-minimize-url",
-        "ignore-revs", "config-name",
+        "username=", "ignore-paths=", "no-minimize-url",
+        "ignore-revs=", "config-name=",
     ]
     # git-svn fetch options
     fetch_shortopts = "r:"
@@ -55,10 +56,6 @@ if __name__ == "__main__":
         # Here are all the options we need to fill in.
         opts_d = {
             "path": args[0],
-            "name": None,
-            "trunk": None,
-            "trunk_tags": None,
-            "ignore_revs": None,
         }
         # The git repo's path is used if given, or we grab it from the
         # end of the svn path.
@@ -85,9 +82,12 @@ if __name__ == "__main__":
                 opts_d["ignore_revs"] = opt[1]
                 opts.remove(opt)
             elif "name" not in opts_d and \
-                 opt[0] == "--config_name":
+                 opt[0] == "--config-name":
                 opts_d["name"] = opt[1]
                 opts.remove(opt)
+
+        # Make the "--config-name" argument optional.
+        opts_d.setdefault("name", "unknown")
 
         svn_repo = SvnRepo(
             name=opts_d["name"]+"_svn",
@@ -108,6 +108,14 @@ if __name__ == "__main__":
             path=opts_d["git_path"],
             svn_repo=svn_repo,
             ignore_revs=ignore_revs,
+        )
+
+        # Pass git_args by flattening the list with chain.from_iterable,
+        # then filtering out the None values.
+        # Need to handle the "-r" argument too, at some point...
+        git_svn_repo.clone(
+            git_args=list(filter(lambda x: x is not None,
+                                 chain.from_iterable(opts)))
         )
 
     else:
