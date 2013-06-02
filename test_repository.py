@@ -443,8 +443,8 @@ class TestStaticGitSvnRepo(TestStaticGitRepo):
             )
 
 
-class TestGitSvnRepo(TestGitRepo):
-    """Test the "GitSvnRepo" class.
+class TestGitSvnRepoBase(TestGitRepo):
+    """Base class for classes to test "GitSvnRepo".
 
     Only for tests that don't make changes to the upstream Subversion
     repository.
@@ -452,7 +452,7 @@ class TestGitSvnRepo(TestGitRepo):
     """
 
     repo_class = GitSvnRepo
-    ignore_revs = (4,)
+    ignore_revs = ()
 
     @classmethod
     def setUpClass(cls, **args):
@@ -470,6 +470,12 @@ class TestGitSvnRepo(TestGitRepo):
 
     def tearDown(self, **args):
         super().tearDown(**args)
+
+class TestGitSvnRepo(TestGitSvnRepoBase):
+
+    """Tests for GitSvnRepo using one ignored revision."""
+
+    ignore_revs = (4,)
 
     def test_clone_revision(self):
         """Test that GitSvnRepo.clone() respects the revision argument."""
@@ -515,6 +521,37 @@ class TestGitSvnRepo(TestGitRepo):
                 cwd=self.repo_path,
                 **_git_cmd_args
             )
+
+
+class TestGitSvnRepo2(TestGitSvnRepoBase):
+
+    """Test the "GitSvnRepo" class with multiple ignore_revs."""
+
+    repo_class = GitSvnRepo
+    ignore_revs = (4,7)
+
+    def test_rebase_revision(self):
+        """Test that GitSvnRepo.rebase respects the "revision" argument."""
+        self.my_repo.clone(
+            revision=1,
+            **_git_cmd_args
+        )
+
+        self.my_repo.rebase(revision=5, **_git_cmd_args)
+
+        # If revision 4 was skipped, "bad_tag" should be missing.
+        with self.assertRaises(subprocess.CalledProcessError):
+            subprocess.check_call(
+                ["git", "show-ref", "-q", "--verify",
+                 "refs/remotes/tags/bad_tag"],
+                cwd=self.repo_path,
+                **_git_cmd_args
+            )
+
+        # At revision 5, there should be no files.
+        sub_dirs = os.listdir(self.repo_path)
+        self.assertNotIn("bad", sub_dirs)
+        self.assertNotIn("foo", sub_dirs)
 
 
 if __name__ == "__main__":

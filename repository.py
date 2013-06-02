@@ -421,6 +421,8 @@ class GitSvnRepo(GitRepo):
         next_revision = self.get_svn_revision(**args) + 1
 
         for irev in self._ignore_revs:
+            if isinstance(revision, int) and irev > revision:
+                break
             if irev < next_revision:
                 continue
             if irev == next_revision:
