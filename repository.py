@@ -101,7 +101,8 @@ class SvnRepo(Repo):
 
     Strictly speaking, this class is not intended to describe an entire
     Subversion repository containing multiple projects, but instead is for
-    a single project's space.
+    a single project's space. It also has no concept of a working
+    copy; all information and methods apply only to the repository itself.
 
     This class inherits from the "Repo" class, and extends the init method
     by adding more information about a project. The "path" attribute
@@ -299,6 +300,7 @@ class GitSvnRepo(GitRepo):
     svn_repo - An SvnRepo object corresponding to the upstream repo.
 
     Public methods:
+    get_svn_revision - Get the current upstream Subversion revision.
     clone - Use "git svn clone" to create this repository.
     rebase - Use "git svn rebase" to update this repository.
 
@@ -322,6 +324,35 @@ class GitSvnRepo(GitRepo):
     def svn_repo(self):
         """Subversion repository upstream of this GitSvnRepo."""
         return self._svn_repo
+
+    def get_svn_revision(self, **args):
+        """Get the Subversion revision upstream of the working copy.
+
+        All keyword arguments are passed to subprocess.check_output().
+        If given, stdout will be stripped out, since that allows you to
+        specify the same arguments here as for the other methods in this
+        class.
+
+        """
+        # Parse the output of "git svn info" to get the current revision.
+        # It's not clear whether we should really do this, or use git
+        # rev-list. It's better to script around plumbing rather than
+        # porcelain, but the nature of this project requires making an
+        # exception for git-svn anyway.
+        #
+        # Since we have to capture this output, strip stdout from args we
+        # were given.
+        output_args = args.copy()
+        if "stdout" in output_args:
+            del output_args["stdout"]
+        git_svn_info = subprocess.check_output(
+            ["git", "svn", "info"],
+            cwd=self.path,
+            universal_newlines=True,
+            **output_args
+        )
+
+        return int(_svn_info_regex.search(git_svn_info).group("revision"))
 
     def clone(self, revision=None, **args):
         """Create a Git clone of a Subversion repository with git-svn.
@@ -373,26 +404,7 @@ class GitSvnRepo(GitRepo):
         """
         svn_trunk = self.svn_repo.trunk_branch
 
-        # Parse the output of "git svn info" to get the current revision.
-        # It's not clear whether we should really do this, or use git
-        # rev-list. It's better to script around plumbing rather than
-        # porcelain, but the nature of this project requires making an
-        # exception for git-svn anyway.
-        #
-        # Since we have to capture this output, strip stdout from args we
-        # were given.
-        output_args = args.copy()
-        del output_args["stdout"]
-        git_svn_info = subprocess.check_output(
-            ["git", "svn", "info"],
-            cwd=self.path,
-            universal_newlines=True,
-            **output_args
-        )
-
-        next_revision = int(
-            _svn_info_regex.search(git_svn_info).group("revision")
-        ) + 1
+        next_revision = self.get_svn_revision(**args) + 1
 
         for irev in self._ignore_revs:
             if irev < next_revision:

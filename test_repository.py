@@ -401,6 +401,18 @@ class TestStaticGitSvnRepo(TestStaticGitRepo):
         GitSvnRepo is preserved."""
         self.assertIs(self.my_svn_repo, self.my_repo.svn_repo)
 
+    def test_get_svn_revision(self):
+        """Check that we can query the revision number and get the same
+        answer as Subversion gives."""
+        # Magic number: I know that the last commit to the test repo was
+        # the creation of a trunk tag, which doesn't change the revision
+        # number that git-svn uses for the trunk. So I add 1 to make up the
+        # difference.
+        self.assertEqual(
+            self.my_svn_repo.get_current_revision(),
+            self.my_repo.get_svn_revision(**_git_cmd_args)+1
+        )
+
     def test_clone(self):
         """Test that GitSvnRepo.clone() produces the expected content."""
 
