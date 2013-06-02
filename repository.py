@@ -14,6 +14,11 @@ import re
 import subprocess
 
 
+# Regular expression used to get the current revision from "svn info".
+# Also works for "git svn info".
+_svn_info_regex = re.compile("Revision: (?P<revision>\d+)")
+
+
 class Repo:
 
     """Base class for all repository objects.
@@ -109,6 +114,9 @@ class SvnRepo(Repo):
     trunk_branch - An SvnBranch object corresponding to the project's
                    trunk.
 
+    Public methods:
+    get_current_revision - Query the latest revision number.
+
     There are also some methods used to interact with the repository, but
     they are fragile and really just meant for testing.
 
@@ -151,6 +159,16 @@ class SvnRepo(Repo):
     def trunk_branch(self):
         """SvnBranch object corresponding to the project's trunk."""
         return self._trunk_branch
+
+    def get_current_revision(self):
+        """Gets the latest revision number from the repository."""
+
+        # Parse the output of "svn info" to get the current revision.
+        svn_info = subprocess.check_output(
+            ["svn", "info", self.path],
+            universal_newlines=True,
+        )
+        return int(_svn_info_regex.search(svn_info).group("revision"))
 
     def create(self):
         """Create the repository.
@@ -372,8 +390,9 @@ class GitSvnRepo(GitRepo):
             **output_args
         )
 
-        next_revision = int(re.search("Revision: (\d+)",
-                                      git_svn_info).group(1)) + 1
+        next_revision = int(
+            _svn_info_regex.search(git_svn_info).group("revision")
+        ) + 1
 
         for irev in self._ignore_revs:
             if irev < next_revision:

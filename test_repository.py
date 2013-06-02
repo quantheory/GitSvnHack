@@ -189,6 +189,12 @@ class TestStaticSvnRepo(TestStaticRepo):
         self.assertEqual(trunk_branch.tags,
                          self.trunk_tags)
 
+    def test_get_current_revision(self):
+        """Test query for the latest revision number."""
+        # Magic number; I happen to know that SvnRepo.create() will make
+        # exactly two commits.
+        self.assertEqual(self.my_repo.get_current_revision(), 2)
+
     def test_create(self):
         """Test that SvnRepo objects, when given a local directory,
         actually initialize a repo there."""
@@ -198,8 +204,8 @@ class TestStaticSvnRepo(TestStaticRepo):
 
         # Use get_path_start to make sure that the top level of the repo
         # is right.
-        self.assertIn(get_path_start(self.trunk_head)+"/",sub_dirs)
-        self.assertIn(get_path_start(self.trunk_tags)+"/",sub_dirs)
+        self.assertIn(get_path_start(self.trunk_head)+"/", sub_dirs)
+        self.assertIn(get_path_start(self.trunk_tags)+"/", sub_dirs)
 
 
 class TestSvnRepo(TestRepo):
@@ -267,7 +273,7 @@ class TestSvnRepo(TestRepo):
             universal_newlines=True,
         )
         sub_dirs = svn_ls.splitlines()
-        self.assertIn(tag_name+"/",sub_dirs)
+        self.assertIn(tag_name+"/", sub_dirs)
 
 
 # This is used to tame the test output, and to clear the environment so
