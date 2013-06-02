@@ -63,6 +63,38 @@ class TempFile:
             pass
 
 
+class TestStaticRepo(unittest.TestCase):
+    """Tests for the "Repo" class that don't change an external repository.
+
+    For these tests, we can use the class versions of the setUp and
+    tearDown methods to set up a test repository. Of course this only
+    matters for subclasses.
+
+    """
+
+    repo_class = Repo
+    repo_name = "test_repo"
+    repo_path = "/path/to/fake"
+
+    @classmethod
+    def setUpClass(cls, **args):
+        args.setdefault("name",cls.repo_name)
+        args.setdefault("path",cls.repo_path)
+        cls.my_repo = cls.repo_class(**args)
+
+    @classmethod
+    def tearDownClass(cls, **args):
+        """Exists only to be called with super()."""
+        pass
+
+    def test_name(self):
+        """Test that Repo objects retain names from __init__."""
+        self.assertEqual(self.my_repo.name, self.repo_name)
+
+    def test_path(self):
+        """Test that Repo objects retain paths from __init__."""
+        self.assertEqual(self.my_repo.path, self.repo_path)
+
 class TestRepo(unittest.TestCase):
     """Test the "Repo" class."""
 
@@ -78,14 +110,6 @@ class TestRepo(unittest.TestCase):
     def tearDown(self, **args):
         """Exists only to be called with super()."""
         pass
-
-    def test_name(self):
-        """Test that Repo objects retain names from __init__."""
-        self.assertEqual(self.my_repo.name, self.repo_name)
-
-    def test_path(self):
-        """Test that Repo objects retain paths from __init__."""
-        self.assertEqual(self.my_repo.path, self.repo_path)
 
 
 class TestSvnBranch(unittest.TestCase):
@@ -120,24 +144,31 @@ def get_path_start(string):
         return string
 
 
-class TestSvnRepo(TestRepo):
-    """Test the "SvnRepo" class."""
+class TestStaticSvnRepo(TestStaticRepo):
+    """Static tests for the "SvnRepo" class.
+
+    All the tests that don't change a repo are here.
+
+    """
 
     repo_class = SvnRepo
     trunk_head = "trunk"
     trunk_tags = "trunk_tags/*"
 
-    def setUp(self, **args):
+    @classmethod
+    def setUpClass(cls, **args):
         # Different arguments for SvnRepo vs. the base Repo.
-        self.repo_path="file://"+tempfile.mkdtemp()
-        args.setdefault("trunk_head", self.trunk_head)
-        args.setdefault("trunk_tags", self.trunk_tags)
-        super().setUp(**args)
+        cls.repo_path="file://"+tempfile.mkdtemp()
+        args.setdefault("trunk_head", cls.trunk_head)
+        args.setdefault("trunk_tags", cls.trunk_tags)
+        super().setUpClass(**args)
+        cls.my_repo.create()
 
-    def tearDown(self, **args):
+    @classmethod
+    def tearDownClass(cls, **args):
         shutil.rmtree(re.sub("^file://","",\
-                             self.repo_path))
-        super().tearDown(**args)
+                             cls.repo_path))
+        super().tearDownClass(**args)
 
     def test_trunk_head(self):
         """Test that SvnRepo objects provide trunk path."""
@@ -159,9 +190,8 @@ class TestSvnRepo(TestRepo):
                          self.trunk_tags)
 
     def test_create(self):
-        """Test that SvnRepo objects, when given a local directory, can
+        """Test that SvnRepo objects, when given a local directory,
         actually initialize a repo there."""
-        self.my_repo.create()
         svn_ls = subprocess.check_output(["svn", "ls", self.repo_path],
                                          universal_newlines=True)
         sub_dirs = svn_ls.splitlines()
@@ -171,9 +201,29 @@ class TestSvnRepo(TestRepo):
         self.assertIn(get_path_start(self.trunk_head)+"/",sub_dirs)
         self.assertIn(get_path_start(self.trunk_tags)+"/",sub_dirs)
 
+
+class TestSvnRepo(TestRepo):
+    """Test the "SvnRepo" class."""
+
+    repo_class = SvnRepo
+    trunk_head = "trunk"
+    trunk_tags = "trunk_tags/*"
+
+    def setUp(self, **args):
+        # Different arguments for SvnRepo vs. the base Repo.
+        self.repo_path="file://"+tempfile.mkdtemp()
+        args.setdefault("trunk_head", self.trunk_head)
+        args.setdefault("trunk_tags", self.trunk_tags)
+        super().setUp(**args)
+        self.my_repo.create()
+
+    def tearDown(self, **args):
+        shutil.rmtree(re.sub("^file://","",\
+                             self.repo_path))
+        super().tearDown(**args)
+
     def test_trunk_import(self):
         """Test that we can import a file into the SvnRepo's trunk."""
-        self.my_repo.create()
         foo_path="foo"
         foo_contents="bar"
         with TempFile() as foo_file:
@@ -189,7 +239,6 @@ class TestSvnRepo(TestRepo):
 
     def test_trunk_rm(self):
         """Test that we can remove a file from SvnRepo's trunk."""
-        self.my_repo.create()
         foo_path="foo"
         foo_contents="bar"
         with TempFile() as foo_file:
@@ -209,7 +258,6 @@ class TestSvnRepo(TestRepo):
 
     def test_make_trunk_tag(self):
         """Test that we can make a trunk tag using an SvnRepo."""
-        self.my_repo.create()
         tag_name = "v1"
         self.my_repo.make_trunk_tag(tag_name)
 
@@ -230,9 +278,41 @@ _git_cmd_args = {
     "env": {},
 }
 
-class TestGitRepo(TestRepo):
-    """Test the "GitRepo" class."""
+class TestStaticGitRepo(TestStaticRepo):
+    """Static tests for the "GitRepo" class.
+
+    All the tests that don't change a repo are here.
+
+    """
+
     repo_class = GitRepo
+
+    @classmethod
+    def setUpClass(cls, **args):
+        cls.repo_path = tempfile.mkdtemp()
+        super().setUpClass(**args)
+        cls.my_repo.init(**_git_cmd_args)
+
+    @classmethod
+    def tearDownClass(cls, **args):
+        shutil.rmtree(cls.repo_path)
+        super().tearDownClass(**args)
+
+    def test_init(self):
+        """Test that using init on a GitRepo actually creates a repo."""
+        subprocess.check_call(
+            ["git", "--git-dir="+os.path.join(self.repo_path,".git"),
+             "ls-files"],
+            **_git_cmd_args
+        )
+
+
+class TestGitRepo(TestRepo):
+
+    """Test the "GitRepo" class."""
+
+    repo_class = GitRepo
+
     def setUp(self, **args):
         self.repo_path = tempfile.mkdtemp()
         super().setUp(**args)
@@ -240,15 +320,6 @@ class TestGitRepo(TestRepo):
     def tearDown(self, **args):
         shutil.rmtree(self.repo_path)
         super().tearDown(**args)
-
-    def test_init(self):
-        """Test that using init on a GitRepo actually creates a repo."""
-        self.my_repo.init(**_git_cmd_args)
-        subprocess.check_call(
-            ["git", "--git-dir="+os.path.join(self.repo_path,".git"),
-             "ls-files"],
-            **_git_cmd_args
-        )
 
 
 @contextlib.contextmanager
@@ -292,10 +363,73 @@ def SvnTestRepo():
                          svn_test_repo.path))
 
 
+class TestStaticGitSvnRepo(TestStaticGitRepo):
+
+    """Test the "GitSvnRepo" class.
+
+    Only for tests that don't make changes to the repository and only need
+    a fairly "vanilla" setup.
+
+    """
+
+    repo_class = GitSvnRepo
+    ignore_revs = (4,)
+    clone_revision = None
+
+    @classmethod
+    def setUpClass(cls, **args):
+        cls.svn_test_repo = SvnTestRepo()
+        cls.my_svn_repo = cls.svn_test_repo.__enter__()
+        args.setdefault("svn_repo", cls.my_svn_repo)
+        args.setdefault("ignore_revs", cls.ignore_revs)
+        super().setUpClass(**args)
+        cls.my_repo.clone(revision=cls.clone_revision, **_git_cmd_args)
+
+    @classmethod
+    def tearDownClass(cls, **args):
+        super().tearDownClass(**args)
+        cls.svn_test_repo.__exit__(None, None, None)
+
+    def test_svn_repo(self):
+        """Check that the Subversion repo used to initialize a
+        GitSvnRepo is preserved."""
+        self.assertIs(self.my_svn_repo, self.my_repo.svn_repo)
+
+    def test_clone(self):
+        """Test that GitSvnRepo.clone() produces the expected content."""
+
+        foo_path = os.path.join(self.repo_path,"foo")
+        with open(foo_path,"r") as foo_file:
+            foo_contents = foo_file.read()
+        self.assertEqual(foo_contents,"bar1\n")
+
+    def test_clone_tag(self):
+        """Test that GitSvnRepo.clone() pulls in tags."""
+
+        subprocess.check_call(
+            ["git", "show-ref", "-q", "--verify", "refs/remotes/tags/v1"],
+            cwd=self.repo_path,
+            **_git_cmd_args
+        )
+
+    def test_ignore_revs(self):
+        """Test that GitSvnRepo.clone skips ignored revisions."""
+
+        # If revision 4 was skipped, "bad_tag" should be missing.
+        with self.assertRaises(subprocess.CalledProcessError):
+            subprocess.check_call(
+                ["git", "show-ref", "-q", "--verify",
+                 "refs/remotes/tags/bad_tag"],
+                cwd=self.repo_path,
+                **_git_cmd_args
+            )
+
+
 class TestGitSvnRepo(TestGitRepo):
     """Test the "GitSvnRepo" class.
 
-    Only for tests that don't make changes to the upstream Subversion repo.
+    Only for tests that don't make changes to the upstream Subversion
+    repository.
 
     """
 
@@ -318,29 +452,6 @@ class TestGitSvnRepo(TestGitRepo):
 
     def tearDown(self, **args):
         super().tearDown(**args)
-
-    def test_svn_repo(self):
-        """Check that the Subversion repo used to initialize a
-        GitSvnRepo is preserved."""
-        self.assertIs(self.my_svn_repo, self.my_repo.svn_repo)
-
-    def test_clone(self):
-        """Test GitSvnRepo's clone method."""
-        self.my_repo.clone(**_git_cmd_args)
-
-        foo_path = os.path.join(self.repo_path,"foo")
-        with open(foo_path,"r") as foo_file:
-            foo_contents = foo_file.read()
-        self.assertEqual(foo_contents,"bar1\n")
-
-    def test_clone_tag(self):
-        """Test that GitSvnRepo.clone() pulls in tags."""
-        self.my_repo.clone(**_git_cmd_args)
-        subprocess.check_call(
-            ["git", "show-ref", "-q", "--verify", "refs/remotes/tags/v1"],
-            cwd=self.repo_path,
-            **_git_cmd_args
-        )
 
     def test_clone_revision(self):
         """Test that GitSvnRepo.clone() respects the revision argument."""
@@ -368,19 +479,6 @@ class TestGitSvnRepo(TestGitRepo):
         # After an update, should have foo, but not the bad file.
         self.assertNotIn("bad", sub_dirs)
         self.assertIn("foo", sub_dirs)
-
-    def test_ignore_revs(self):
-        """Test that GitSvnRepo.clone skips ignored revisions."""
-        self.my_repo.clone(**_git_cmd_args)
-
-        # If revision 4 was skipped, "bad_tag" should be missing.
-        with self.assertRaises(subprocess.CalledProcessError):
-            subprocess.check_call(
-                ["git", "show-ref", "-q", "--verify",
-                 "refs/remotes/tags/bad_tag"],
-                cwd=self.repo_path,
-                **_git_cmd_args
-            )
 
 
 if __name__ == "__main__":
