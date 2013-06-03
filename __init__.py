@@ -10,6 +10,7 @@ The package __init__.py is also the script to be run as git-svnhack.
 
 if __name__ == "__main__":
     from getopt import gnu_getopt
+    import GitSvnHack.commands
     from itertools import chain
     import os
     import subprocess
@@ -119,4 +120,4 @@ if __name__ == "__main__":
         )
 
     else:
-        os.execvp("git", ["git", "svn"]+sys.argv[1:])
+        commands.default(sys.argv[1:])
