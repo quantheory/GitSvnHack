@@ -14,6 +14,8 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
 
    - [ ] init
    - [ ] clone
+     - [ ] Handle -s option properly.
+     - [ ] Handle -r option properly.
    - [ ] fetch
    - [ ] rebase
 
