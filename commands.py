@@ -82,20 +82,21 @@ def clone(arguments):
              opt[0] == "--ignore-revs":
             opts_d["ignore_revs"] = opt[1]
             opts.remove(opt)
+        elif "revision" not in opts_d and \
+             opt[0] == "--revision" or opt[0] == "-r":
+            opts_d["revision"] = opt[1]
+            opts.remove(opt)
         elif "name" not in opts_d and \
              opt[0] == "--config-name":
             opts_d["name"] = opt[1]
             opts.remove(opt)
 
-    # Make the "--config-name" argument optional.
+    # Make the "--config-name" and "-r" arguments optional.
     opts_d.setdefault("name", "unknown")
-
-    svn_repo = SvnRepo(
-        name=opts_d["name"]+"_svn",
-        path=opts_d["path"],
-        trunk_head=opts_d["trunk"],
-        trunk_tags=opts_d["trunk_tags"],
-    )
+    if "revision" in opts_d:
+        revision = int(opts_d["revision"])
+    else:
+        revision = None
 
     # Treate --ignore-revs as a comma-separated list.
     if "ignore_revs" in opts_d:
@@ -103,6 +104,13 @@ def clone(arguments):
                        opts_d["ignore_revs"].split(",")]
     else:
         ignore_revs = []
+
+    svn_repo = SvnRepo(
+        name=opts_d["name"]+"_svn",
+        path=opts_d["path"],
+        trunk_head=opts_d["trunk"],
+        trunk_tags=opts_d["trunk_tags"],
+    )
 
     git_svn_repo = GitSvnRepo(
         name=opts_d["name"],
@@ -114,8 +122,9 @@ def clone(arguments):
     # Pass git_args by flattening the list with chain.from_iterable,
     # then filtering out the None values.
     git_svn_repo.clone(
+        revision=revision,
         git_args=list(filter(lambda x: x is not None,
-                             chain.from_iterable(opts)))
+                             chain.from_iterable(opts))),
     )
 
 def default(arguments):

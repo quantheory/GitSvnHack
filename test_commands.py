@@ -31,7 +31,7 @@ class TestClone(unittest.TestCase):
             "file://foo", "git_foo",
             "--config-name", "foo_name", "--username", "joe",
             "-T", "bar_tr", "--tags", "bar_ta",
-            "--ignore-revs", "22",
+            "--ignore-revs", "22", "-r", "25",
         ]
         clone(args)
         mock_SvnRepo.assert_called_once_with(
@@ -47,6 +47,7 @@ class TestClone(unittest.TestCase):
             ignore_revs=[22],
         )
         mock_GitSvnRepo.return_value.clone.assert_called_once_with(
+            revision=25,
             git_args=["--username", "joe"],
         )
 
@@ -76,6 +77,7 @@ class TestClone(unittest.TestCase):
             ignore_revs=[],
         )
         mock_GitSvnRepo.return_value.clone.assert_called_once_with(
+            revision=None,
             git_args=[],
         )
 

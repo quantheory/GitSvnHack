@@ -13,9 +13,9 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
 ** TODO Wrap more git-svn commands
 
    - [ ] init
-   - [ ] clone
+   - [-] clone
      - [ ] Handle -s option properly.
-     - [ ] Handle -r option properly.
+     - [X] Handle -r option properly.
    - [ ] fetch
    - [ ] rebase
 
