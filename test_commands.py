@@ -47,7 +47,36 @@ class TestClone(unittest.TestCase):
             ignore_revs=[22],
         )
         mock_GitSvnRepo.return_value.clone.assert_called_once_with(
-            git_args=["--username", "joe"]
+            git_args=["--username", "joe"],
+        )
+
+    @mock.patch('GitSvnHack.commands.GitSvnRepo')
+    @mock.patch('GitSvnHack.commands.SvnRepo')
+    def test_clone_minimal(self, mock_SvnRepo, mock_GitSvnRepo):
+        """Test clone command with minimal arguments.
+
+        This tests that the clone command can fill in some arguments.
+
+        """
+        args = [
+            "file://foo",
+            "-T", "bar_tr", "--tags", "bar_ta",
+        ]
+        clone(args)
+        mock_SvnRepo.assert_called_once_with(
+            name="unknown_svn",
+            path="file://foo",
+            trunk_head="bar_tr",
+            trunk_tags="bar_ta",
+        )
+        mock_GitSvnRepo.assert_called_once_with(
+            name="unknown",
+            path="foo",
+            svn_repo=mock_SvnRepo.return_value,
+            ignore_revs=[],
+        )
+        mock_GitSvnRepo.return_value.clone.assert_called_once_with(
+            git_args=[],
         )
 
 

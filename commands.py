@@ -98,11 +98,11 @@ def clone(arguments):
     )
 
     # Treate --ignore-revs as a comma-separated list.
-    if opts_d["ignore_revs"] is None:
-        ignore_revs = []
-    else:
+    if "ignore_revs" in opts_d:
         ignore_revs = [int(i) for i in
                        opts_d["ignore_revs"].split(",")]
+    else:
+        ignore_revs = []
 
     git_svn_repo = GitSvnRepo(
         name=opts_d["name"],
