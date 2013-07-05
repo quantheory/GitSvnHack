@@ -77,7 +77,7 @@ class TestClone(unittest.TestCase):
         )
         mock_GitSvnRepo.return_value.clone.assert_called_once_with(
             revision=None,
-            git_args=[],
+            git_args=["-s"],
         )
 
 

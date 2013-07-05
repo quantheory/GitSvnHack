@@ -95,7 +95,6 @@ def clone(arguments):
             opts_d["trunk"] = "trunk"
             if "trunk_tags" not in opts_d:
                 opts_d["trunk_tags"] = "tags"
-            opts.remove(opt)
 
     # Make the "--config-name" and "-r" arguments optional.
     opts_d.setdefault("name", "unknown")
@@ -129,7 +128,7 @@ def clone(arguments):
     # then filtering out the None values.
     git_svn_repo.clone(
         revision=revision,
-        git_args=list(filter(lambda x: x is not None,
+        git_args=list(filter(lambda x: x is not None and x != "",
                              chain.from_iterable(opts))),
     )
 

@@ -41,3 +41,5 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
    - [ ] Error messages for common problems with options.
      + [ ] Missing layout option for init/clone (-T or -s).
      + [ ] Specifying an argument multiple times (e.g. -r for clone).
+   - [ ] Fix passing an empty string to an option (if git-svn allows
+     this?).
