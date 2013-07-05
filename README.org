@@ -23,6 +23,8 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
 ** TODO Wrap more git-svn commands
 
    - [ ] init
+     + [ ] Write --ignore-revs information to the config file.
+     + [ ] Create options object.
    - [ ] fetch
    - [X] clone
      + [X] Handle -s option properly.
@@ -41,6 +43,7 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
    - [ ] Implement "check" to guarantee that revisions of the trunk and/or
      tags in Subversion are actually identical to the checked-out tags in
      Git.
+   - [ ] Read/write of "mapping" configuration files between git and svn.
 
 ** TODO Migration
 
@@ -56,4 +59,6 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
      + [ ] Specifying an argument multiple times (e.g. -r for clone).
    - [ ] Fix passing an empty string to an option (if git-svn allows
      this?).
-   - [ ] Read/write of "mapping" configuration files between git and svn.
+   - [ ] Allow full URL arguments to -T/-t/-b.
+   - [ ] Allow --ignore-revs to contain ranges (and be specified multiple
+     times?).

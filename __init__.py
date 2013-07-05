@@ -16,6 +16,8 @@ if __name__ == "__main__":
     # svnhack-specific message here.
     if len(sys.argv) == 1:
         os.execvp("git", ["git", "svn"])
+    if sys.argv[1] == "init":
+        commands.init(sys.argv[2:])
     if sys.argv[1] == "clone":
         commands.clone(sys.argv[2:])
     else:

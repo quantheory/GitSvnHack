@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """"Tests for the GitSvnHack.commands module."""
 
-from GitSvnHack.commands import clone, default
+from GitSvnHack.commands import init, clone, default
 
+import os
 import sys
 import unittest
 
@@ -14,6 +15,71 @@ else:
     import unittest.mock
 
 
+class TestInit(unittest.TestCase):
+
+    """Test the init command."""
+
+    @mock.patch('GitSvnHack.commands.GitSvnRepo')
+    @mock.patch('GitSvnHack.commands.SvnRepo')
+    def test_init(self, mock_SvnRepo, mock_GitSvnRepo):
+        """Test basic functionality of the init command.
+
+        This verifies that the command interacts with the Repo objects as
+        expected.
+
+        """
+        args = [
+            "file://foo", "git_foo",
+            "--config-name", "foo_name", "--username", "joe",
+            "-T", "bar_tr", "--tags", "bar_ta",
+            "--ignore-revs", "22",
+        ]
+        init(args)
+        mock_SvnRepo.assert_called_once_with(
+            name="foo_name_svn",
+            path="file://foo",
+            trunk_head="bar_tr",
+            trunk_tags="bar_ta",
+        )
+        mock_GitSvnRepo.assert_called_once_with(
+            name="foo_name",
+            path="git_foo",
+            svn_repo=mock_SvnRepo.return_value,
+            ignore_revs=[22],
+        )
+        mock_GitSvnRepo.return_value.init.assert_called_once_with(
+            git_args=["--username", "joe"],
+        )
+
+    @mock.patch('GitSvnHack.commands.GitSvnRepo')
+    @mock.patch('GitSvnHack.commands.SvnRepo')
+    def test_init_minimal(self, mock_SvnRepo, mock_GitSvnRepo):
+        """Test init command with minimal arguments.
+
+        This tests that the init command can fill in some arguments.
+
+        """
+        args = [
+            "file://foo", "-s",
+        ]
+        init(args)
+        mock_SvnRepo.assert_called_once_with(
+            name="unknown_svn",
+            path="file://foo",
+            trunk_head="trunk",
+            trunk_tags="tags",
+        )
+        mock_GitSvnRepo.assert_called_once_with(
+            name="unknown",
+            path=os.getcwd(),
+            svn_repo=mock_SvnRepo.return_value,
+            ignore_revs=[],
+        )
+        mock_GitSvnRepo.return_value.init.assert_called_once_with(
+            git_args=["-s"],
+        )
+
+
 class TestClone(unittest.TestCase):
 
     """Test the clone command."""
@@ -23,7 +89,7 @@ class TestClone(unittest.TestCase):
     def test_clone(self, mock_SvnRepo, mock_GitSvnRepo):
         """Test basic functionality of the clone command.
 
-        This verifies that the command interacts with the Repo commands as
+        This verifies that the command interacts with the Repo objects as
         expected.
 
         """
