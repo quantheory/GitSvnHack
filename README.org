@@ -26,9 +26,9 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
 
 ** TODO Wrap more git-svn commands
 
-   - [ ] init
+   - [-] init
      + [ ] Write --ignore-revs information to the config file.
-     + [ ] Create options object.
+     + [X] Create options object.
    - [ ] fetch
    - [X] clone
      + [X] Handle -s option properly.

@@ -67,41 +67,40 @@ class OptSpec:
 
 
 # git-svn general options
-_gen_shortopts = "A:q"
-_gen_longopts = [
+_gen_opts = OptSpec("A:q", [
     "authors-file=", "authors-prog=",
     "quiet", "repack=", "repack-flags=",
-]
+])
+
 # git-svn init options; --no-metadata and --prefix are incompatible
 # with git-svnhack, which needs the metadata and might use --prefix
 # itself in the near future.
 # Also, add here the git-svnhack options "ignore-revs" and
 # "config-name".
-_init_shortopts = "T:t:b:s"
-_init_longopts = [
+_init_opts = OptSpec("T:t:b:s", [
     "shared=","template="
     "trunk=", "tags=", "branches=", "stdlayout",
     "use-svm-props", "use-svnsync-props",
     "rewrite-root=", "rewrite-uuid=",
     "username=", "ignore-paths=", "no-minimize-url",
     "ignore-revs=", "config-name=",
-]
+])
+
 # git-svn fetch options
-_fetch_shortopts = "r:"
-_fetch_longopts = [
+_fetch_opts = OptSpec("r:", [
     "revision=",
     "localtime", "parent", "ignore-paths=",
     "log-window-size=", "use-log-author",
-]
+])
+
 # git-svn clone options
-_clone_shortopts = ""
-_clone_longopts = ["preserve-empty-dirs", "placeholder-filename="]
+_clone_opts = OptSpec("", [
+    "preserve-empty-dirs", "placeholder-filename="
+])
 
 def init(arguments):
     """GitSvnHack init command."""
-    shortopts = _init_shortopts+_gen_shortopts
-    longopts = list(chain(_init_longopts, _gen_longopts))
-    opts, args = gnu_getopt(arguments, shortopts, longopts)
+    opts, args = (_init_opts+_gen_opts).parse(arguments)
     # Dictionary of options to be passed.
     opts_d = {
         "path": args[0],
@@ -174,11 +173,8 @@ def init(arguments):
 
 def clone(arguments):
     """GitSvnHack clone command."""
-    shortopts = _clone_shortopts+_fetch_shortopts+\
-                _init_shortopts+_gen_shortopts
-    longopts = list(chain(_clone_longopts, _fetch_longopts, _init_longopts,
-                          _gen_longopts))
-    opts, args = gnu_getopt(arguments, shortopts, longopts)
+    opts, args = (_clone_opts+_fetch_opts+
+                  _init_opts+_gen_opts).parse(arguments)
     # Dictionary of options to be passed.
     opts_d = {
         "path": args[0],
