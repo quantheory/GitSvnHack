@@ -16,6 +16,56 @@ from getopt import gnu_getopt
 from itertools import chain
 import os
 
+
+class OptSpec:
+
+    """Option specification.
+
+    Public instance variables:
+    shortopts - Short form options.
+    longopts - Long form options.
+
+    Public methods:
+    copy - Copy this OptSpec object.
+    parse - Parse an argument list.
+    __iadd__/__add__ - Two OptSpec objects can be combined.
+
+    """
+
+    def __init__(self, shortopts, longopts):
+        self._shortopts = shortopts
+        self._longopts = longopts[:]
+
+    @property
+    def shortopts(self):
+        """Getopts-style specification of short options."""
+        return self._shortopts
+
+    @property
+    def longopts(self):
+        """Getopts-style specification of long options."""
+        return self._longopts
+
+    def copy(self):
+        return OptSpec(self.shortopts, self.longopts)
+
+    def parse(self, args):
+        """Parse argument list with gnu_getopts."""
+        return gnu_getopt(args, self._shortopts, self._longopts)
+
+    def __iadd__(self, other):
+        """Concatenate options into this OptSpec."""
+        self._shortopts += other.shortopts
+        self._longopts += other.longopts
+        return self
+
+    def __add__(self, other):
+        "Combine options into a new OptSpec."
+        ret = self.copy()
+        ret += other
+        return ret
+
+
 # git-svn general options
 _gen_shortopts = "A:q"
 _gen_longopts = [

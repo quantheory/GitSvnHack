@@ -18,6 +18,10 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
    - Git :: 1.8.1
    - Subversion :: 1.7
 
+** Required for tests
+
+   - Python 3.3 or the Python mock library.
+
 * To-do list
 
 ** TODO Wrap more git-svn commands

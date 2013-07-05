@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """"Tests for the GitSvnHack.commands module."""
 
-from GitSvnHack.commands import init, clone, default
+from GitSvnHack.commands import OptSpec, init, clone, default
 
 import os
 import sys
@@ -13,6 +13,67 @@ if sys.version_info[0:1] < (3,3):
     import mock
 else:
     import unittest.mock
+
+
+class TestOptSpec(unittest.TestCase):
+
+    """Test the OptSpec class."""
+
+    shortopts1 = "a:"
+    longopts1 = [ "aa=" ]
+    shortopts2 = "b"
+    longopts2 = [ "bb" ]
+
+    def setUp(self):
+        self.opts1 = OptSpec(self.shortopts1, self.longopts1)
+        self.opts2 = OptSpec(self.shortopts2, self.longopts2)
+
+    def test_shortopts(self):
+        """Check shortopts property."""
+        self.assertEqual(self.shortopts1, self.opts1.shortopts)
+
+    def test_longopts(self):
+        """Check longopts property."""
+        self.assertEqual(self.longopts1, self.opts1.longopts)
+
+    def test_copy(self):
+        """Check to see if copies are exact."""
+        opts_new = self.opts1.copy()
+        self.assertEqual(opts_new.shortopts, self.opts1.shortopts)
+        self.assertEqual(opts_new.longopts, self.opts1.longopts)
+
+    def test_parse(self):
+        """Test argument parsing."""
+        opts, args = self.opts1.parse(["--aa", "foo", "-a", "foo2", "bar"])
+        self.assertIn(("--aa", "foo"), opts)
+        self.assertIn(("-a", "foo2"), opts)
+        self.assertIn("bar", args)
+        opts, args = self.opts2.parse(["bar2", "-b", "--bb"])
+        self.assertIn(("--bb", ""), opts)
+        self.assertIn(("-b", ""), opts)
+        self.assertIn("bar2", args)
+
+    def test___iadd__(self):
+        """Test in-place combination of OptSpec objects."""
+        self.opts1 += self.opts2
+        self.assertEqual(self.opts1.shortopts,
+                         self.shortopts1+self.shortopts2)
+        self.assertEqual(self.opts1.longopts,
+                         self.longopts1+self.longopts2)
+        self.assertEqual(self.opts2.shortopts, self.shortopts2)
+        self.assertEqual(self.opts2.longopts, self.longopts2)
+
+    def test___add__(self):
+        """Test creation of a new OptSpec by combining old ones."""
+        opts_new = self.opts1 + self.opts2
+        self.assertEqual(opts_new.shortopts,
+                         self.shortopts1+self.shortopts2)
+        self.assertEqual(opts_new.longopts,
+                         self.longopts1+self.longopts2)
+        self.assertEqual(self.opts1.shortopts, self.shortopts1)
+        self.assertEqual(self.opts1.longopts, self.longopts1)
+        self.assertEqual(self.opts2.shortopts, self.shortopts2)
+        self.assertEqual(self.opts2.longopts, self.longopts2)
 
 
 class TestInit(unittest.TestCase):
