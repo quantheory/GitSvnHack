@@ -379,7 +379,7 @@ class GitSvnRepo(GitRepo):
         rebase_revision = None
         if len(self._ignore_revs) > 0:
             if revision is not None:
-                if revision > self._ignore_revs[0]:
+                if revision >= self._ignore_revs[0]:
                     clone_revision = self._ignore_revs[0] - 1
                     rebase_revision = revision
                 else:

@@ -524,7 +524,7 @@ class TestGitSvnRepo2(TestGitSvnRepoBase):
     def test_rebase_revision(self):
         """Test that GitSvnRepo.rebase respects the "revision" argument."""
         self.my_repo.clone(
-            revision=1,
+            revision=4,
             **_git_cmd_args
         )
 
