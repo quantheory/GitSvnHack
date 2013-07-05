@@ -1,4 +1,3 @@
-
 #+startup: content
 
 GitSvnHack is (or will be) a set of tools for managing git-svn
@@ -7,6 +6,17 @@ repositories with svn:externals.
 License: GPL version 3 or any later version
 
 Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
+
+* Requirements
+
+** Known requirements
+
+  - Python :: 3.2 or later
+
+** Oldest tested versions
+
+   - Git :: 1.8.1
+   - Subversion :: 1.7
 
 * To-do list
 
@@ -28,6 +38,9 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
    - [ ] Split out subdirectories as if they were externals
    - [ ] The actual external handling
    - [ ] Handle svn:ignore
+   - [ ] Implement "check" to guarantee that revisions of the trunk and/or
+     tags in Subversion are actually identical to the checked-out tags in
+     Git.
 
 ** TODO Migration
 
@@ -43,3 +56,4 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
      + [ ] Specifying an argument multiple times (e.g. -r for clone).
    - [ ] Fix passing an empty string to an option (if git-svn allows
      this?).
+   - [ ] Read/write of "mapping" configuration files between git and svn.

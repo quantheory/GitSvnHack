@@ -437,7 +437,7 @@ class GitSvnRepo(GitRepo):
             next_revision = irev+1
 
         if revision is None:
-            revision="HEAD"
+            revision = "HEAD"
         subprocess.check_call(
             ["git", "svn", "fetch",
              "-r", str(next_revision)+":"+str(revision)]+git_args,

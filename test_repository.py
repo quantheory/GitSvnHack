@@ -519,7 +519,7 @@ class TestGitSvnRepo2(TestGitSvnRepoBase):
     """Test the "GitSvnRepo" class with multiple ignore_revs."""
 
     repo_class = GitSvnRepo
-    ignore_revs = (4,7)
+    ignore_revs = (7,4)
 
     def test_rebase_revision(self):
         """Test that GitSvnRepo.rebase respects the "revision" argument."""
