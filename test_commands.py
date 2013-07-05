@@ -60,15 +60,14 @@ class TestClone(unittest.TestCase):
 
         """
         args = [
-            "file://foo",
-            "-T", "bar_tr", "--tags", "bar_ta",
+            "file://foo", "-s",
         ]
         clone(args)
         mock_SvnRepo.assert_called_once_with(
             name="unknown_svn",
             path="file://foo",
-            trunk_head="bar_tr",
-            trunk_tags="bar_ta",
+            trunk_head="trunk",
+            trunk_tags="tags",
         )
         mock_GitSvnRepo.assert_called_once_with(
             name="unknown",

@@ -90,6 +90,12 @@ def clone(arguments):
              opt[0] == "--config-name":
             opts_d["name"] = opt[1]
             opts.remove(opt)
+        elif "trunk" not in opts_d and \
+             opt[0] == "-s" or opt[0] == "--stdlayout":
+            opts_d["trunk"] = "trunk"
+            if "trunk_tags" not in opts_d:
+                opts_d["trunk_tags"] = "tags"
+            opts.remove(opt)
 
     # Make the "--config-name" and "-r" arguments optional.
     opts_d.setdefault("name", "unknown")

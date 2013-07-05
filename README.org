@@ -13,10 +13,10 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
 ** TODO Wrap more git-svn commands
 
    - [ ] init
-   - [-] clone
-     - [ ] Handle -s option properly.
-     - [X] Handle -r option properly.
    - [ ] fetch
+   - [X] clone
+     + [X] Handle -s option properly.
+     + [X] Handle -r option properly.
    - [ ] rebase
 
 ** TODO Major features
@@ -24,7 +24,7 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
    - [ ] Look at the output from git-svn to make sure I really have all the
      options in the wrappers.
    - [ ] Get clones of git-svn repositories working (creating a clone with
-   the Subversion repository as upstream, not the git-svn one).
+     the Subversion repository as upstream, not the git-svn one).
    - [ ] Split out subdirectories as if they were externals
    - [ ] The actual external handling
    - [ ] Handle svn:ignore
@@ -35,3 +35,9 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
      to submodules.
    - [ ] Handle authors file.
    - [ ] Convert svn:ignore to .gitignore
+
+** TODO User interface
+
+   - [ ] Error messages for common problems with options.
+     + [ ] Missing layout option for init/clone (-T or -s).
+     + [ ] Specifying an argument multiple times (e.g. -r for clone).
