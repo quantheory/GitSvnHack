@@ -305,6 +305,7 @@ class GitSvnRepo(GitRepo):
 
     Public methods:
     get_svn_revision - Get the current upstream Subversion revision.
+    init - Use "git svn init" to initialize this repository.
     clone - Use "git svn clone" to create this repository.
     rebase - Use "git svn rebase" to update this repository.
 
@@ -334,7 +335,7 @@ class GitSvnRepo(GitRepo):
 
         Arguments:
         git_args - An iterable yielding additional arguments for the git
-                   init command.
+                   commands.
 
         All other keyword arguments are passed to
         subprocess.check_output().
@@ -354,14 +355,43 @@ class GitSvnRepo(GitRepo):
         output_args = args.copy()
         if "stdout" in output_args:
             del output_args["stdout"]
-        git_svn_info = subprocess.check_output(
-            ["git", "svn", "info"]+git_args,
+        try:
+            svn_remote_hash = subprocess.check_output(
+                ["git", "show-ref", "remotes/trunk", "--hash"]+git_args,
+                cwd=self.path,
+                universal_newlines=True,
+                **output_args
+            )
+        except subprocess.CalledProcessError:
+            return 0
+
+        svn_revision = subprocess.check_output(
+            ["git", "svn", "find-rev", svn_remote_hash.strip()]+git_args,
             cwd=self.path,
             universal_newlines=True,
             **output_args
         )
 
-        return int(_svn_info_regex.search(git_svn_info).group("revision"))
+        return int(svn_revision)
+
+    def init(self, git_args=[], **args):
+        """Initialize a git-svn repository with Subversion information.
+
+        Arguments:
+        git_args - An iterable yielding additional arguments for the git
+                   init command.
+
+        Any additional keyword arguments provided are passed to
+        subprocess.check_call().
+
+        """
+        svn_trunk = self.svn_repo.trunk_branch
+        subprocess.check_call(
+            ["git", "svn", "init", self.svn_repo.path,
+             "-T", svn_trunk.head, "-t", svn_trunk.tags,
+             self.path]+git_args,
+            **args
+        )
 
     def clone(self, revision=None, git_args=[], **args):
         """Create a Git clone of a Subversion repository with git-svn.

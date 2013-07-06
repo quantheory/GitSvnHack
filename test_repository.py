@@ -491,8 +491,7 @@ class TestGitSvnRepo(TestGitSvnRepoBase):
 
     def test_rebase(self):
         """Test that GitSvnRepo.rebase() updates the repository."""
-        self.my_repo.clone(
-            revision=3,
+        self.my_repo.init(
             **_git_cmd_args
         )
 

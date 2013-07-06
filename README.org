@@ -27,6 +27,8 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
 ** TODO Wrap more git-svn commands
 
    - [-] init
+     + [X] Add interface.
+     + [X] Add implementation.
      + [ ] Write --ignore-revs information to the config file.
      + [X] Create options object.
    - [ ] fetch
@@ -66,3 +68,9 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
    - [ ] Allow full URL arguments to -T/-t/-b.
    - [ ] Allow --ignore-revs to contain ranges (and be specified multiple
      times?).
+   - [ ] Create man page.
+
+** TODO Miscellany
+
+   - [ ] Figure out something more correct than looking at "remotes/trunk"
+     in get_svn_revision.
