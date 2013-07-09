@@ -53,6 +53,7 @@ class TestGitSvnDefParser(TestConfigBase):
             "svn_url": "file://svn_origin",
             "svn_trunk_head": "trunk",
             "svn_trunk_tags": "trunk_tags/*",
+            "ignore_revs": "",
         }
 
         # Use version_dicts to create several unique repo definitions.
@@ -67,6 +68,7 @@ class TestGitSvnDefParser(TestConfigBase):
                 "svn_url = "+rd["svn_url"],
                 "svn_trunk = "+rd["svn_trunk_head"]+
                 ","+rd["svn_trunk_tags"],
+                "ignore_revs = "+rd["ignore_revs"],
             ]
             file_sections.append("\n".join(file_lines))
         # Get file contents from joining all the sections.
@@ -90,6 +92,8 @@ class TestGitSvnDefParser(TestConfigBase):
                              rd["svn_url"]+"/"+rd["svn_trunk_head"])
             self.assertEqual(repo.svn_repo.trunk_tags,
                              rd["svn_url"]+"/"+rd["svn_trunk_tags"])
+            self.assertCountEqual(repo.ignore_revs,
+                                  [int(s) for s in rd["ignore_revs"]])
 
     def test_no_files(self):
         """Test that the get_repos method on zero files yields an

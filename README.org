@@ -73,5 +73,7 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
 
 ** TODO Miscellany
 
-   - [ ] Figure out something more correct than looking at "remotes/trunk"
-     in get_svn_revision.
+   - [ ] Read git-svn sections of config file rather than using a separate
+     file for GitSvnHack.
+     + [ ] Figure out something more correct than looking at "remotes/trunk"
+       in get_svn_revision.

@@ -25,14 +25,17 @@ class GitSvnDefParser:
         repos = []
         for name in repo_names:
             repo_dict = self._cfg_parse[name]
-            trunk_head,trunk_tags = repo_dict["svn_trunk"].split(",")
+            trunk_head, trunk_tags = repo_dict["svn_trunk"].split(",")
             svn_repo = SvnRepo(name="svn_"+name,
                                path=repo_dict["svn_url"],
                                trunk_head=trunk_head,
                                trunk_tags=trunk_tags)
+            ignore_revs = [int(s) for s in
+                           repo_dict["ignore_revs"].split(",")]
             repos.append(
                 GitSvnRepo(name=name,
                            path=repo_dict["path"],
+                           ignore_revs=ignore_revs,
                            svn_repo=svn_repo)
             )
         return repos
