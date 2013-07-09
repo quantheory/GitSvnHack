@@ -401,6 +401,10 @@ class TestStaticGitSvnRepo(TestStaticGitRepo):
         GitSvnRepo is preserved."""
         self.assertIs(self.my_svn_repo, self.my_repo.svn_repo)
 
+    def test_revs(self):
+        """Check that ignore_revs is set correctly by the constructor."""
+        self.assertCountEqual(self.my_repo.ignore_revs, self.ignore_revs)
+
     def test_get_svn_revision(self):
         """Check that we can query the revision number and get the same
         answer as Subversion gives."""

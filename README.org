@@ -29,6 +29,7 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
    - [-] init
      + [X] Add interface.
      + [X] Add implementation.
+     + [ ] Create GitSvnRepo object from an existing repo.
      + [ ] Write --ignore-revs information to the config file.
      + [X] Create options object.
    - [ ] fetch

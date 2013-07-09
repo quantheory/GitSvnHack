@@ -330,6 +330,11 @@ class GitSvnRepo(GitRepo):
         """Subversion repository upstream of this GitSvnRepo."""
         return self._svn_repo
 
+    @property
+    def ignore_revs(self):
+        """Subversion repository upstream of this GitSvnRepo."""
+        return self._ignore_revs
+
     def get_svn_revision(self, git_args=[], **args):
         """Get the Subversion revision upstream of the working copy.
 
@@ -407,15 +412,15 @@ class GitSvnRepo(GitRepo):
 
         """
         rebase_revision = None
-        if len(self._ignore_revs) > 0:
+        if len(self.ignore_revs) > 0:
             if revision is not None:
-                if revision >= self._ignore_revs[0]:
-                    clone_revision = self._ignore_revs[0] - 1
+                if revision >= self.ignore_revs[0]:
+                    clone_revision = self.ignore_revs[0] - 1
                     rebase_revision = revision
                 else:
                     clone_revision = revision
             else:
-                clone_revision = self._ignore_revs[0] - 1
+                clone_revision = self.ignore_revs[0] - 1
                 rebase_revision = "HEAD"
         else:
             if revision is not None:
@@ -450,7 +455,7 @@ class GitSvnRepo(GitRepo):
 
         next_revision = self.get_svn_revision(**args) + 1
 
-        for irev in self._ignore_revs:
+        for irev in self.ignore_revs:
             if isinstance(revision, int) and irev > revision:
                 break
             if irev < next_revision:
