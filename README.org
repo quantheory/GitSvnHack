@@ -29,8 +29,8 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
    - [-] init
      + [X] Add interface.
      + [X] Add implementation.
-     + [ ] Create GitSvnRepo object from an existing repo.
      + [ ] Write --ignore-revs information to the config file.
+       - [ ] Create GitSvnRepo object from an existing repo.
      + [X] Create options object.
    - [ ] fetch
    - [X] clone
@@ -44,20 +44,21 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
      options in the wrappers.
    - [ ] Get clones of git-svn repositories working (creating a clone with
      the Subversion repository as upstream, not the git-svn one).
-   - [ ] Split out subdirectories as if they were externals
-   - [ ] The actual external handling
-   - [ ] Handle svn:ignore
+   - [ ] Split out subdirectories as if they were externals.
+   - [ ] The actual external handling.
+   - [ ] Handle svn:ignore.
    - [ ] Implement "check" to guarantee that revisions of the trunk and/or
      tags in Subversion are actually identical to the checked-out tags in
      Git.
    - [ ] Read/write of "mapping" configuration files between git and svn.
+   - [ ] Multiple Subversion repos for one GitSvnRepo.
 
 ** TODO Migration
 
    - [ ] Create a "migrate" command to convert svnhack's external handling
      to submodules.
    - [ ] Handle authors file.
-   - [ ] Convert svn:ignore to .gitignore
+   - [ ] Convert svn:ignore to .gitignore.
 
 ** TODO User interface
 

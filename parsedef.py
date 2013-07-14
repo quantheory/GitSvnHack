@@ -17,7 +17,13 @@ class GitSvnDefParser:
         )
 
     def read(self, path):
+        "Read a definition file."
         self._cfg_parse.read(path)
+
+    def write(self, path):
+        "Write out the definition file."
+        with open(path, "w+") as def_file:
+            self._cfg_parse.write(def_file)
 
     def get_repos(self):
         """Read definition file into repository objects."""
@@ -39,3 +45,17 @@ class GitSvnDefParser:
                            svn_repo=svn_repo)
             )
         return repos
+
+    def set_repos(self, repos):
+        "Set a list of repos whose definitions will be written."
+        for repo in repos:
+            self._cfg_parse.add_section(repo.name)
+            self._cfg_parse.set(
+                repo.name, "svn_trunk",
+                ",".join([repo.svn_repo.trunk_head,
+                          repo.svn_repo.trunk_tags])
+            )
+            self._cfg_parse.set(repo.name, "svn_url", repo.svn_repo.path)
+            self._cfg_parse.set(repo.name, "path", repo.path)
+            self._cfg_parse.set(repo.name, "ignore_revs",
+                                ",".join(str(i) for i in repo.ignore_revs))
