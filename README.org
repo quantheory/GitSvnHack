@@ -63,6 +63,8 @@ Copyright 2013 Sean Patrick Santos <SeanPatrickSantos@gmail.com>
 ** TODO User interface
 
    - [ ] Error messages for common problems with options.
+     + [ ] Missing required non-option arguments (i.e. catch IndexError if
+       you try to call commands.init with no path).
      + [ ] Missing layout option for init/clone (-T or -s).
      + [ ] Specifying an argument multiple times (e.g. -r for clone).
    - [ ] Fix passing an empty string to an option (if git-svn allows

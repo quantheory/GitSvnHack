@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """"Tests for the GitSvnHack.commands module."""
 
-from GitSvnHack.commands import OptSpec, init, clone, default
+from GitSvnHack.commands import *
 
 import os
 import sys
@@ -14,6 +14,70 @@ if sys.version_info[0:1] < (3,3):
 else:
     import unittest.mock
 
+class TestParsedArgs(unittest.TestCase):
+
+    """Test the ParsedArgs class."""
+
+    def test_get_string_list(self):
+        """Check that we get back the same arguments that are put in."""
+        test_args = ParsedArgs([("--bar", "bararg")], ["foo"])
+        self.assertCountEqual(test_args.get_string_list(),
+                              ["foo", "--bar", "bararg"])
+
+    def test_pop_any_opt_of_nomatch(self):
+        """Test popping a non-present argument from the option list."""
+        test_args = ParsedArgs([], [])
+        self.assertIsNone(test_args.pop_any_opt_of("-z"))
+
+    def test_pop_any_opt_of_bin(self):
+        """Test popping a binary argument from the option list."""
+        test_args = ParsedArgs([("-b", "")], [])
+        self.assertTrue(test_args.pop_any_opt_of("-b"))
+        self.assertIsNone(test_args.pop_any_opt_of("-b"))
+
+    def test_pop_any_opt_of_dup(self):
+        """Test popping a duplicate argument from the option list."""
+        test_args = ParsedArgs([("-b", ""), ("-b", ""), ("-b", "")], [])
+        self.assertTrue(test_args.pop_any_opt_of("-b"))
+        self.assertTrue(test_args.pop_any_opt_of("-b"))
+        self.assertTrue(test_args.pop_any_opt_of("-b"))
+        self.assertIsNone(test_args.pop_any_opt_of("-b"))
+
+    def test_pop_any_opt_of_multi(self):
+        """Test popping any of several arguments."""
+        test_args = ParsedArgs([("-b", ""), ("-n", "")], [])
+        self.assertTrue(test_args.pop_any_opt_of("-b", "-n", "-z"))
+        self.assertTrue(test_args.pop_any_opt_of("-b", "-n", "-z"))
+        self.assertIsNone(test_args.pop_any_opt_of("-b", "-n", "-z"))
+
+    def test_pop_any_opt_of_string(self):
+        """Test popping a string argument from the option list."""
+        test_args = ParsedArgs([("-s", "foo")], [])
+        self.assertEqual(test_args.pop_any_opt_of("-s"), "foo")
+        self.assertIsNone(test_args.pop_any_opt_of("-s"))
+
+    def test_get_any_opt_of_nomatch(self):
+        """Test getting a non-present argument from the option list."""
+        test_args = ParsedArgs([], [])
+        self.assertIsNone(test_args.get_any_opt_of("-z"))
+
+    def test_get_any_opt_of_bin(self):
+        """Test getting binary arguments from the option list."""
+        test_args = ParsedArgs([("-b", ""),("-n", "")], [])
+        self.assertTrue(test_args.get_any_opt_of("-b"))
+        self.assertTrue(test_args.get_any_opt_of("-b"))
+        self.assertTrue(test_args.get_any_opt_of("-b", "-n", "-z"))
+
+    def test_get_any_opt_of_string(self):
+        """Test popping a string argument from the option list."""
+        test_args = ParsedArgs([("-s", "foo")], [])
+        self.assertEqual(test_args.get_any_opt_of("-s"), "foo")
+
+    def test_pop_arg(self):
+        """Test popping an argument from the list."""
+        test_args = ParsedArgs([], ["foo"])
+        self.assertEqual(test_args.pop_arg(), "foo")
+        self.assertIsNone(test_args.pop_arg())
 
 class TestOptSpec(unittest.TestCase):
 
@@ -28,19 +92,11 @@ class TestOptSpec(unittest.TestCase):
         self.opts1 = OptSpec(self.shortopts1, self.longopts1)
         self.opts2 = OptSpec(self.shortopts2, self.longopts2)
 
-    def test_shortopts(self):
-        """Check shortopts property."""
-        self.assertEqual(self.shortopts1, self.opts1.shortopts)
-
-    def test_longopts(self):
-        """Check longopts property."""
-        self.assertEqual(self.longopts1, self.opts1.longopts)
-
     def test_copy(self):
         """Check to see if copies are exact."""
         opts_new = self.opts1.copy()
-        self.assertEqual(opts_new.shortopts, self.opts1.shortopts)
-        self.assertEqual(opts_new.longopts, self.opts1.longopts)
+        self.assertEqual(opts_new._shortopts, self.opts1._shortopts)
+        self.assertEqual(opts_new._longopts, self.opts1._longopts)
 
     def test_parse(self):
         """Test argument parsing."""
@@ -56,24 +112,24 @@ class TestOptSpec(unittest.TestCase):
     def test___iadd__(self):
         """Test in-place combination of OptSpec objects."""
         self.opts1 += self.opts2
-        self.assertEqual(self.opts1.shortopts,
+        self.assertEqual(self.opts1._shortopts,
                          self.shortopts1+self.shortopts2)
-        self.assertEqual(self.opts1.longopts,
+        self.assertEqual(self.opts1._longopts,
                          self.longopts1+self.longopts2)
-        self.assertEqual(self.opts2.shortopts, self.shortopts2)
-        self.assertEqual(self.opts2.longopts, self.longopts2)
+        self.assertEqual(self.opts2._shortopts, self.shortopts2)
+        self.assertEqual(self.opts2._longopts, self.longopts2)
 
     def test___add__(self):
         """Test creation of a new OptSpec by combining old ones."""
         opts_new = self.opts1 + self.opts2
-        self.assertEqual(opts_new.shortopts,
+        self.assertEqual(opts_new._shortopts,
                          self.shortopts1+self.shortopts2)
-        self.assertEqual(opts_new.longopts,
+        self.assertEqual(opts_new._longopts,
                          self.longopts1+self.longopts2)
-        self.assertEqual(self.opts1.shortopts, self.shortopts1)
-        self.assertEqual(self.opts1.longopts, self.longopts1)
-        self.assertEqual(self.opts2.shortopts, self.shortopts2)
-        self.assertEqual(self.opts2.longopts, self.longopts2)
+        self.assertEqual(self.opts1._shortopts, self.shortopts1)
+        self.assertEqual(self.opts1._longopts, self.longopts1)
+        self.assertEqual(self.opts2._shortopts, self.shortopts2)
+        self.assertEqual(self.opts2._longopts, self.longopts2)
 
 
 class TestInit(unittest.TestCase):

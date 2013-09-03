@@ -13,9 +13,89 @@ git-svn.
 from GitSvnHack.repository import SvnRepo, GitSvnRepo
 
 from getopt import gnu_getopt
+from functools import wraps
 from itertools import chain
 import os
 
+class ParsedArgs:
+
+    """Container for the passed arguments, after option parsing.
+
+    Public methods:
+    get_string_list - Get all arguments in a list of strings.
+    pop_any_opt_of - Pop the value of the first option match.
+    get_any_opt_of - Get the value of the first option match.
+    pop_arg - Pop the first argument.
+
+    """
+
+    def __init__(self, opts, args):
+        self._opts = opts
+        self._args = args
+
+    def get_string_list(self):
+        """Collapse parsed arguments back into a list of strings."""
+        is_valid_argument = lambda x: x is not None and x != ""
+        flattened_opts = chain.from_iterable(self._opts)
+        arg_list = list(filter(is_valid_argument, flattened_opts))
+        arg_list += self._args
+        return arg_list
+
+    # Use this as a decorator to handle empty strings in return values.
+    def _fix_empty_opt(function):
+        @wraps(function)
+        def fixed_function(*args, **kwargs):
+            opt = function(*args, **kwargs)
+            if opt != "":
+                return opt
+            else:
+                return True
+        return fixed_function
+
+    @_fix_empty_opt
+    def pop_any_opt_of(self, *opts_to_pop):
+        """Pop the first option matching one of the arguments.
+
+        Outputs are True for binary arguments, the string for a string
+        argument, and None for a non-present argument.
+
+        """
+
+        pop_operation = lambda i: self._opts.pop(i)[1]
+
+        return self._apply_to_any_of(pop_operation, *opts_to_pop)
+
+    @_fix_empty_opt
+    def get_any_opt_of(self, *opts_to_get):
+        """Get the first option matching one of the arguments.
+
+        Outputs are True for binary arguments, the string for a string
+        argument, and None for a non-present argument.
+
+        """
+
+        get_operation = lambda i: self._opts[i][1]
+
+        return self._apply_to_any_of(get_operation, *opts_to_get)
+
+    def _apply_to_any_of(self, find_operation, *opts_to_find):
+
+        for i in range(len(self._opts)):
+            if self._opts[i][0] in opts_to_find:
+                return find_operation(i)
+
+        return None
+
+    # The _fix_empty_opt function does not do anything meaningful outside
+    # of this class definition.
+    del _fix_empty_opt
+
+    def pop_arg(self):
+        """Pop the first non-option argument from the list."""
+        if len(self._args) > 0:
+            return self._args.pop(0)
+        else:
+            return None
 
 class OptSpec:
 
@@ -36,18 +116,9 @@ class OptSpec:
         self._shortopts = shortopts
         self._longopts = longopts[:]
 
-    @property
-    def shortopts(self):
-        """Getopts-style specification of short options."""
-        return self._shortopts
-
-    @property
-    def longopts(self):
-        """Getopts-style specification of long options."""
-        return self._longopts
-
     def copy(self):
-        return OptSpec(self.shortopts, self.longopts)
+        """Return an OptSpec that's a copy of this one."""
+        return OptSpec(self._shortopts, self._longopts)
 
     def parse(self, args):
         """Parse argument list with gnu_getopts."""
@@ -55,8 +126,8 @@ class OptSpec:
 
     def __iadd__(self, other):
         """Concatenate options into this OptSpec."""
-        self._shortopts += other.shortopts
-        self._longopts += other.longopts
+        self._shortopts += other._shortopts
+        self._longopts += other._longopts
         return self
 
     def __add__(self, other):
@@ -100,50 +171,37 @@ _clone_opts = OptSpec("", [
 
 def init(arguments):
     """GitSvnHack init command."""
-    opts, args = (_init_opts+_gen_opts).parse(arguments)
+    opt_spec = _init_opts+_gen_opts
+    parsed_args = ParsedArgs(*opt_spec.parse(arguments))
+
     # Dictionary of options to be passed.
-    opts_d = {
-        "path": args[0],
-    }
-    # The git repo's path is used if given, or use current working
-    # directory.
-    if len(args) > 1:
-        opts_d["git_path"] = args[1]
-    else:
+    opts_d = dict()
+
+    opts_d["path"] = parsed_args.pop_arg()
+    opts_d["git_path"] = parsed_args.pop_arg()
+
+    # If the git repo's path is not given, use current working directory.
+    if opts_d["git_path"] is None:
         opts_d["git_path"] = os.getcwd()
 
-    # Loop over a copy of the options, removing values we handle as we
-    # go.
+    # Get parsed arguments into our dictionary.
     # Note that the first "-t" option has special significance; it is
     # assumed to hold the trunk tags.
-    for opt in opts[:]:
-        if "trunk" not in opts_d and \
-           opt[0] == "-T" or opt[0] == "--trunk":
-            opts_d["trunk"] = opt[1]
-            opts.remove(opt)
-        elif "trunk_tags" not in opts_d and \
-             opt[0] == "-t" or opt[0] == "--tags":
-            opts_d["trunk_tags"] = opt[1]
-            opts.remove(opt)
-        elif "ignore_revs" not in opts_d and \
-             opt[0] == "--ignore-revs":
-            opts_d["ignore_revs"] = opt[1]
-            opts.remove(opt)
-        elif "name" not in opts_d and \
-             opt[0] == "--config-name":
-            opts_d["name"] = opt[1]
-            opts.remove(opt)
-        elif "trunk" not in opts_d and \
-             opt[0] == "-s" or opt[0] == "--stdlayout":
-            opts_d["trunk"] = "trunk"
-            if "trunk_tags" not in opts_d:
-                opts_d["trunk_tags"] = "tags"
+
+    opts_d["trunk"] = parsed_args.pop_any_opt_of("-T", "--trunk")
+    opts_d["trunk_tags"] = parsed_args.pop_any_opt_of("-t", "--tags")
+    opts_d["ignore_revs"] = parsed_args.pop_any_opt_of("--ignore-revs")
+    opts_d["name"] = parsed_args.pop_any_opt_of("--config-name")
+    if parsed_args.get_any_opt_of("-s", "--stdlayout"):
+        opts_d["trunk"] = "trunk"
+        opts_d["trunk_tags"] = "tags"
 
     # Make the "--config-name" argument optional.
-    opts_d.setdefault("name", "unknown")
+    if opts_d["name"] is None:
+        opts_d["name"] = "unknown"
 
     # Treate --ignore-revs as a comma-separated list.
-    if "ignore_revs" in opts_d:
+    if opts_d["ignore_revs"] is not None:
         ignore_revs = [int(i) for i in
                        opts_d["ignore_revs"].split(",")]
     else:
@@ -166,66 +224,47 @@ def init(arguments):
     # Pass git_args by flattening the list with chain.from_iterable,
     # then filtering out the None values.
     git_svn_repo.init(
-        git_args=list(filter(lambda x: x is not None and x != "",
-                             chain.from_iterable(opts))),
+        git_args=parsed_args.get_string_list(),
     )
 
 
 def clone(arguments):
     """GitSvnHack clone command."""
-    opts, args = (_clone_opts+_fetch_opts+
-                  _init_opts+_gen_opts).parse(arguments)
+    opt_spec = _clone_opts+_fetch_opts+_init_opts+_gen_opts
+    parsed_args = ParsedArgs(*opt_spec.parse(arguments))
+
     # Dictionary of options to be passed.
-    opts_d = {
-        "path": args[0],
-    }
-    # The git repo's path is used if given, or we grab it from the
-    # end of the svn path.
-    if len(args) > 1:
-        opts_d["git_path"] = args[1]
-    else:
+    opts_d = dict()
+
+    opts_d["path"] = parsed_args.pop_arg()
+    opts_d["git_path"] = parsed_args.pop_arg()
+
+    # If the git repo's path is not given, grab it from the end of the svn
+    # URL.
+    if opts_d["git_path"] is None:
         opts_d["git_path"] = opts_d["path"].split("/")[-1]
 
-    # Loop over a copy of the options, removing values we handle as we
-    # go.
+    # Get parsed arguments into our dictionary.
     # Note that the first "-t" option has special significance; it is
     # assumed to hold the trunk tags.
-    for opt in opts[:]:
-        if "trunk" not in opts_d and \
-           opt[0] == "-T" or opt[0] == "--trunk":
-            opts_d["trunk"] = opt[1]
-            opts.remove(opt)
-        elif "trunk_tags" not in opts_d and \
-             opt[0] == "-t" or opt[0] == "--tags":
-            opts_d["trunk_tags"] = opt[1]
-            opts.remove(opt)
-        elif "ignore_revs" not in opts_d and \
-             opt[0] == "--ignore-revs":
-            opts_d["ignore_revs"] = opt[1]
-            opts.remove(opt)
-        elif "revision" not in opts_d and \
-             opt[0] == "--revision" or opt[0] == "-r":
-            opts_d["revision"] = opt[1]
-            opts.remove(opt)
-        elif "name" not in opts_d and \
-             opt[0] == "--config-name":
-            opts_d["name"] = opt[1]
-            opts.remove(opt)
-        elif "trunk" not in opts_d and \
-             opt[0] == "-s" or opt[0] == "--stdlayout":
-            opts_d["trunk"] = "trunk"
-            if "trunk_tags" not in opts_d:
-                opts_d["trunk_tags"] = "tags"
+
+    opts_d["trunk"] = parsed_args.pop_any_opt_of("-T", "--trunk")
+    opts_d["trunk_tags"] = parsed_args.pop_any_opt_of("-t", "--tags")
+    opts_d["ignore_revs"] = parsed_args.pop_any_opt_of("--ignore-revs")
+    opts_d["revision"] = parsed_args.pop_any_opt_of("-r", "--revision")
+    opts_d["name"] = parsed_args.pop_any_opt_of("--config-name")
+    if parsed_args.get_any_opt_of("-s", "--stdlayout"):
+        opts_d["trunk"] = "trunk"
+        opts_d["trunk_tags"] = "tags"
 
     # Make the "--config-name" and "-r" arguments optional.
-    opts_d.setdefault("name", "unknown")
-    if "revision" in opts_d:
-        revision = int(opts_d["revision"])
-    else:
-        revision = None
+    if opts_d["name"] is None:
+        opts_d["name"] = "unknown"
+    if opts_d["revision"] is not None:
+        opts_d["revision"] = int(opts_d["revision"])
 
     # Treate --ignore-revs as a comma-separated list.
-    if "ignore_revs" in opts_d:
+    if opts_d["ignore_revs"] is not None:
         ignore_revs = [int(i) for i in
                        opts_d["ignore_revs"].split(",")]
     else:
@@ -248,9 +287,8 @@ def clone(arguments):
     # Pass git_args by flattening the list with chain.from_iterable,
     # then filtering out the None values.
     git_svn_repo.clone(
-        revision=revision,
-        git_args=list(filter(lambda x: x is not None and x != "",
-                             chain.from_iterable(opts))),
+        revision=opts_d["revision"],
+        git_args=parsed_args.get_string_list(),
     )
 
 def default(arguments):
