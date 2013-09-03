@@ -174,52 +174,11 @@ def init(arguments):
     opt_spec = _init_opts+_gen_opts
     parsed_args = ParsedArgs(*opt_spec.parse(arguments))
 
-    # Dictionary of options to be passed.
-    opts_d = dict()
+    opts_d = _make_init_opts_dict(parsed_args)
 
-    opts_d["path"] = parsed_args.pop_arg()
-    opts_d["git_path"] = parsed_args.pop_arg()
+    _dict_set_default(opts_d, "git_path", os.getcwd())
 
-    # If the git repo's path is not given, use current working directory.
-    if opts_d["git_path"] is None:
-        opts_d["git_path"] = os.getcwd()
-
-    # Get parsed arguments into our dictionary.
-    # Note that the first "-t" option has special significance; it is
-    # assumed to hold the trunk tags.
-
-    opts_d["trunk"] = parsed_args.pop_any_opt_of("-T", "--trunk")
-    opts_d["trunk_tags"] = parsed_args.pop_any_opt_of("-t", "--tags")
-    opts_d["ignore_revs"] = parsed_args.pop_any_opt_of("--ignore-revs")
-    opts_d["name"] = parsed_args.pop_any_opt_of("--config-name")
-    if parsed_args.get_any_opt_of("-s", "--stdlayout"):
-        opts_d["trunk"] = "trunk"
-        opts_d["trunk_tags"] = "tags"
-
-    # Make the "--config-name" argument optional.
-    if opts_d["name"] is None:
-        opts_d["name"] = "unknown"
-
-    # Treate --ignore-revs as a comma-separated list.
-    if opts_d["ignore_revs"] is not None:
-        ignore_revs = [int(i) for i in
-                       opts_d["ignore_revs"].split(",")]
-    else:
-        ignore_revs = []
-
-    svn_repo = SvnRepo(
-        name=opts_d["name"]+"_svn",
-        path=opts_d["path"],
-        trunk_head=opts_d["trunk"],
-        trunk_tags=opts_d["trunk_tags"],
-    )
-
-    git_svn_repo = GitSvnRepo(
-        name=opts_d["name"],
-        path=opts_d["git_path"],
-        svn_repo=svn_repo,
-        ignore_revs=ignore_revs,
-    )
+    git_svn_repo = _git_svn_repo_from_dict(opts_d)
 
     # Pass git_args by flattening the list with chain.from_iterable,
     # then filtering out the None values.
@@ -227,48 +186,36 @@ def init(arguments):
         git_args=parsed_args.get_string_list(),
     )
 
+def _dict_set_default(opts_d, key, default):
+    if opts_d[key] is None:
+        opts_d[key] = default
 
-def clone(arguments):
-    """GitSvnHack clone command."""
-    opt_spec = _clone_opts+_fetch_opts+_init_opts+_gen_opts
-    parsed_args = ParsedArgs(*opt_spec.parse(arguments))
-
-    # Dictionary of options to be passed.
-    opts_d = dict()
+def _make_init_opts_dict(parsed_args):
+    opts_d = {}
 
     opts_d["path"] = parsed_args.pop_arg()
     opts_d["git_path"] = parsed_args.pop_arg()
 
-    # If the git repo's path is not given, grab it from the end of the svn
-    # URL.
-    if opts_d["git_path"] is None:
-        opts_d["git_path"] = opts_d["path"].split("/")[-1]
-
-    # Get parsed arguments into our dictionary.
     # Note that the first "-t" option has special significance; it is
     # assumed to hold the trunk tags.
 
     opts_d["trunk"] = parsed_args.pop_any_opt_of("-T", "--trunk")
     opts_d["trunk_tags"] = parsed_args.pop_any_opt_of("-t", "--tags")
     opts_d["ignore_revs"] = parsed_args.pop_any_opt_of("--ignore-revs")
-    opts_d["revision"] = parsed_args.pop_any_opt_of("-r", "--revision")
     opts_d["name"] = parsed_args.pop_any_opt_of("--config-name")
     if parsed_args.get_any_opt_of("-s", "--stdlayout"):
         opts_d["trunk"] = "trunk"
         opts_d["trunk_tags"] = "tags"
 
-    # Make the "--config-name" and "-r" arguments optional.
-    if opts_d["name"] is None:
-        opts_d["name"] = "unknown"
-    if opts_d["revision"] is not None:
-        opts_d["revision"] = int(opts_d["revision"])
+    return opts_d
+
+def _git_svn_repo_from_dict(opts_d):
+
+    # Make the "--config-name" argument optional.
+    _dict_set_default(opts_d, "name", "unknown")
 
     # Treate --ignore-revs as a comma-separated list.
-    if opts_d["ignore_revs"] is not None:
-        ignore_revs = [int(i) for i in
-                       opts_d["ignore_revs"].split(",")]
-    else:
-        ignore_revs = []
+    opts_d["ignore_revs"] = _comma_str_to_int_list(opts_d["ignore_revs"])
 
     svn_repo = SvnRepo(
         name=opts_d["name"]+"_svn",
@@ -281,8 +228,31 @@ def clone(arguments):
         name=opts_d["name"],
         path=opts_d["git_path"],
         svn_repo=svn_repo,
-        ignore_revs=ignore_revs,
+        ignore_revs=opts_d["ignore_revs"],
     )
+
+    return git_svn_repo
+
+def _comma_str_to_int_list(string):
+    if string is not None:
+        return [int(i) for i in string.split(",")]
+    else:
+        return []
+
+def clone(arguments):
+    """GitSvnHack clone command."""
+    opt_spec = _clone_opts+_fetch_opts+_init_opts+_gen_opts
+    parsed_args = ParsedArgs(*opt_spec.parse(arguments))
+
+    opts_d = _make_clone_opts_dict(parsed_args)
+
+    _dict_set_default(opts_d, "git_path", _url_basename(opts_d["path"]))
+
+    git_svn_repo = _git_svn_repo_from_dict(opts_d)
+
+    # Make the "-r" argument optional.
+    if opts_d["revision"] is not None:
+        opts_d["revision"] = int(opts_d["revision"])
 
     # Pass git_args by flattening the list with chain.from_iterable,
     # then filtering out the None values.
@@ -290,6 +260,15 @@ def clone(arguments):
         revision=opts_d["revision"],
         git_args=parsed_args.get_string_list(),
     )
+
+def _make_clone_opts_dict(parsed_args):
+    opts_d = _make_init_opts_dict(parsed_args)
+
+    opts_d["revision"] = parsed_args.pop_any_opt_of("-r", "--revision")
+    return opts_d
+
+def _url_basename(url):
+    return url.split("/")[-1]
 
 def default(arguments):
     """"Default command that simply calls git svn with all arguments."""
