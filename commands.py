@@ -3,6 +3,7 @@
 
 The following git-svn commands have wrappers:
 
+init
 clone
 
 There's also a "default" command, which will pass any other command to
@@ -180,8 +181,6 @@ def init(arguments):
 
     git_svn_repo = _git_svn_repo_from_dict(opts_d)
 
-    # Pass git_args by flattening the list with chain.from_iterable,
-    # then filtering out the None values.
     git_svn_repo.init(
         git_args=parsed_args.get_string_list(),
     )
@@ -254,8 +253,6 @@ def clone(arguments):
     if opts_d["revision"] is not None:
         opts_d["revision"] = int(opts_d["revision"])
 
-    # Pass git_args by flattening the list with chain.from_iterable,
-    # then filtering out the None values.
     git_svn_repo.clone(
         revision=opts_d["revision"],
         git_args=parsed_args.get_string_list(),
